@@ -2,7 +2,6 @@ package com.stkj.cashier.app.main
 
 import android.annotation.SuppressLint
 import android.app.ActivityManager
-import android.app.AlertDialog
 import android.app.Notification
 import android.content.Context
 import android.content.Intent
@@ -23,11 +22,10 @@ import android.text.TextUtils
 import android.util.Log
 import android.util.SparseArray
 import android.view.Display
+import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
-import android.widget.LinearLayout
-import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.NonNull
@@ -35,7 +33,6 @@ import androidx.annotation.RequiresApi
 import androidx.core.util.valueIterator
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
-import androidx.viewpager.widget.ViewPager.OnAdapterChangeListener
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.FutureTarget
 import com.king.base.util.SystemUtils
@@ -44,7 +41,6 @@ import com.stkj.cashier.R
 import com.stkj.cashier.app.base.BaseActivity
 import com.stkj.cashier.app.base.helper.SystemEventHelper
 import com.stkj.cashier.app.base.helper.SystemEventHelper.OnSystemEventListener
-import com.stkj.cashier.app.mode.AmountFragment
 import com.stkj.cashier.app.setting.Consumption1SettingFragment
 import com.stkj.cashier.bean.CheckAppVersionBean
 import com.stkj.cashier.bean.CompanyMemberBean
@@ -63,7 +59,6 @@ import com.stkj.cashier.scan.ScanCodeCallback
 import com.stkj.cashier.scan.SupportDevices
 import com.stkj.cashier.scan.scan.ScanCallBack
 import com.stkj.cashier.scan.scan.ScanTool
-import com.stkj.cashier.util.AdbCommandExecutor
 import com.stkj.cashier.util.ByteReverser
 import com.stkj.cashier.util.ParseData
 import com.stkj.cashier.util.QueueManager
@@ -104,8 +99,7 @@ import java.io.IOException
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.nio.charset.StandardCharsets
-import java.util.Arrays
-import java.util.Objects
+import java.util.LinkedList
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -144,12 +138,14 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
 
     var latch: CountDownLatch? = null
 
+
     //lateinit var progressDialog: AlertDialog //更新进度弹窗
     //lateinit var allFaceDownDialog: AlertDialog //全量人脸
     lateinit var tvProgress: TextView
     //lateinit var sbProgress: ProgressBar
 
     var allFaceDown: Boolean = false
+    private val timestampList = LinkedList<Long>()
     private var netStatusDisposable: Disposable? = null
     private var keyEventResolver: KeyEventResolver? = null
 
@@ -1500,7 +1496,6 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
             //LogUtils.e("按键MainActivity device vendorId: " + event.device.vendorId + " productId: " + event.device.productId)
 
 
-
             if (event.keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER || event.keyCode == KeyEvent.KEYCODE_F1 || event.keyCode == KeyEvent.KEYCODE_DEL) {
                 if (event.action == KeyEvent.ACTION_UP) {
                     val content = keyEventResolver?.getInputCode(event)
@@ -1527,12 +1522,44 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
             }
 
             // 判断当前如果是支付状态,处理USB 扫码枪键盘事件
-            if ((AmountFragment.mIsPaying || mainFragment.amountFragment.isRefund()) && !SPUtils.getInstance().getBoolean(Constants.FRAGMENT_SET)) {
+            Log.d(TAG,
+                "limeisPaying ========> mainFragment.amountFragment.isPaying() " + mainFragment.amountFragment.isPaying() + "  mainFragment.amountFragment.isRefund(): " + mainFragment.amountFragment.isRefund() + "  !SPUtils.getInstance().getBoolean(Constants.FRAGMENT_SET): " + !SPUtils.getInstance()
+                    .getBoolean(Constants.FRAGMENT_SET)
+            )
+            if ((mainFragment.amountFragment.isPaying() || mainFragment.amountFragment.isRefund()) && !SPUtils.getInstance()
+                    .getBoolean(Constants.FRAGMENT_SET)
+            ) {
                 if (event.action == KeyEvent.ACTION_DOWN) {
                     keyEventResolver?.analysisKeyEvent(event)
                 }
                 return true
             }
+
+
+            when (event.keyCode) {
+                in 7..16 -> {
+                    timestampList.addLast(System.currentTimeMillis())
+                }
+            }
+
+            if (event.keyCode == KeyEvent.KEYCODE_ENTER) {
+                if (event.action == KeyEvent.ACTION_UP) {
+                    if (timestampList.size >= 18) {
+                        if (System.currentTimeMillis() - timestampList[timestampList.size - 18] < 300L) {
+                            timestampList.clear()
+                            Log.i(TAG, "limetimestampList ========> List size  < 300ms ")
+                            return true
+                        } else {
+                            Log.w(TAG, "limetimestampList ========> List size  >= 300ms")
+                        }
+                    } else {
+                        Log.d(TAG, "limetimestampList ========> List size  < 18 ")
+                    }
+                    timestampList.clear()
+
+                }
+            }
+
 
             if (event.action == KeyEvent.ACTION_UP) {
                 val content = keyEventResolver?.getInputCode(event)
@@ -1547,6 +1574,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
         }
         return superDispatchKeyEvent(event)
     }
+
 
     private fun dispatchEvent(message: MessageEventBean) {
         Log.d(TAG, "limeonKeyEvent3 ========> dispatchEvent " + message.ext)
