@@ -44,6 +44,7 @@ import com.stkj.cashier.R
 import com.stkj.cashier.app.base.BaseActivity
 import com.stkj.cashier.app.base.helper.SystemEventHelper
 import com.stkj.cashier.app.base.helper.SystemEventHelper.OnSystemEventListener
+import com.stkj.cashier.app.mode.AmountFragment
 import com.stkj.cashier.app.setting.Consumption1SettingFragment
 import com.stkj.cashier.bean.CheckAppVersionBean
 import com.stkj.cashier.bean.CompanyMemberBean
@@ -675,7 +676,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
             override fun onScanSuccess(barcode: String?) {
                 LogUtils.e("扫码: 键盘" + barcode)
 
-                Log.e(TAG,"limeparams 571: onScanSuccess ========================================")
+                Log.i(TAG,"limeonScanSuccess 679: barcode ======================================== " + barcode)
                 if (barcode?.length!! > 8) {
                     onScanCallBack(barcode)
                 }
@@ -1490,12 +1491,17 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
 //            LogUtils.e("按键MainActivity back")
 //            return true
 //        }
-            LogUtils.e("按键MainActivity keyCode: " + event.keyCode + "  device: " + event.device.name)
+            if (event.action == KeyEvent.ACTION_UP) {
+                Log.d(
+                    TAG,
+                    "按键MainActivity keyCode: " + event.keyCode + "  device: " + event.device.name
+                )
+            }
             //LogUtils.e("按键MainActivity device vendorId: " + event.device.vendorId + " productId: " + event.device.productId)
 
 
 
-            if (event.keyCode == KeyEvent.KEYCODE_ENTER || event.keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER || event.keyCode == KeyEvent.KEYCODE_F1 || event.keyCode == KeyEvent.KEYCODE_DEL) {
+            if (event.keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER || event.keyCode == KeyEvent.KEYCODE_F1 || event.keyCode == KeyEvent.KEYCODE_DEL) {
                 if (event.action == KeyEvent.ACTION_UP) {
                     val content = keyEventResolver?.getInputCode(event)
                     dispatchEvent(MessageEventBean(MessageEventType.KeyEventNumber, content))
@@ -1511,10 +1517,20 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                 return true
             }
 
+            // 退款， 确认按键处理
+            if (event.keyCode == KeyEvent.KEYCODE_ENTER && mainFragment.amountFragment.isRefundListShow()) {
+                if (event.action == KeyEvent.ACTION_UP) {
+                    val content = keyEventResolver?.getInputCode(event)
+                    dispatchEvent(MessageEventBean(MessageEventType.KeyEventNumber, content))
+                }
+                return true
+            }
 
             // 判断当前如果是支付状态,处理USB 扫码枪键盘事件
-            if ((mainFragment.amountFragment.isPaying() || mainFragment.amountFragment.isRefund()) && !SPUtils.getInstance().getBoolean(Constants.FRAGMENT_SET)) {
-                keyEventResolver?.analysisKeyEvent(event)
+            if ((AmountFragment.mIsPaying || mainFragment.amountFragment.isRefund()) && !SPUtils.getInstance().getBoolean(Constants.FRAGMENT_SET)) {
+                if (event.action == KeyEvent.ACTION_DOWN) {
+                    keyEventResolver?.analysisKeyEvent(event)
+                }
                 return true
             }
 

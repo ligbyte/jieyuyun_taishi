@@ -467,7 +467,7 @@
                         android:layout_height="wrap_content"
                         android:alpha="1"
                         android:lineSpacingExtra="5.2sp"
-                        android:text="删除"
+                        android:text="清除"
                         android:textColor="#00DC82"
                         android:textSize="48sp" />
 

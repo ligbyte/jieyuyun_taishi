@@ -1815,4 +1815,9 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
         return isCurrentFixAmountMode
     }
 
+    fun isRefundListShow():Boolean{
+        return binding.llRefundList.visibility == View.VISIBLE
+    }
+
+
 }
