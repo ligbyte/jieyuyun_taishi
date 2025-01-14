@@ -555,7 +555,7 @@
                 android:gravity="center"
                 android:paddingTop="20dp"
                 android:paddingBottom="20dp"
-                android:text="请点击键盘[上翻][下翻]选择内容，删除键返回"
+                android:text="请点击键盘[上翻][下翻]选择内容，清除键返回"
                 android:textColor="#00dc82"
                 android:textSize="40sp" />
         </LinearLayout>

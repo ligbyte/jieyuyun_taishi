@@ -72,6 +72,7 @@ import com.stkj.cashier.util.UpdateService
 import com.stkj.cashier.util.keyevent.KeyEventResolver
 import com.stkj.cashier.util.util.AppUtils
 import com.stkj.cashier.util.util.BarUtils
+import com.stkj.cashier.util.util.ConvertUtils
 import com.stkj.cashier.util.util.EncryptUtils
 import com.stkj.cashier.util.util.LogUtils
 import com.stkj.cashier.util.util.SPUtils
@@ -94,6 +95,8 @@ import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import retrofit2.HttpException
+import tp.xmaihh.serialport.SerialHelper
+import tp.xmaihh.serialport.bean.ComBean
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -193,22 +196,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
     private fun handlePayLogic() {
         if (job == null || job!!.isCancelled || job!!.isCompleted) {
         job = GlobalScope.launch {
-            Log.d(TAG, "limescan startScan == > 162")
-//                if (job == null || job!!.isCancelled || job!!.isCompleted) {
-//                    initUsbCard()
-//                }
-            //isFinish = true
-            //if (isFinish) {
             initCardReader3()
-            //}
-
-            if (!initScanTool()) {
-                ttsSpeak("该机型还没有适配扫码功能")
-            } else {
-                ScanTool.GET.playSound(true)
-            }
-//                initScanTool()
-
         }
     }
     }
@@ -216,77 +204,43 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
 
     @SuppressLint("SetTextI18n")
     private fun initCardReader3() {
-        //isFinish = false
-        //tty580P
-        NfcUtil.getInstance().initSerial("/dev/ttyHSL1", 9600)
-        var receive: ByteArray? = null
-        var startTime: Long? = null
         GlobalScope.launch {
-            //while (!isFinish) {
-            while (true) {
-                Log.d(TAG, "initCardReader3: 寻卡")
-                val selectCard = NfcUtil.getInstance().selectCard()
-                if (selectCard != null) {
-                    val cardType = selectCard.cardType
-                    Log.e(TAG, "Card 类型:  == > " + selectCard.cardType)
-                    Log.d(TAG, "卡号 : " + NfcUtil.toHexString(selectCard.cardNum))
+            try {
+                ///dev/ttyS5 读卡 /dev/ttyS1 读卡  //ttyS3 称重 115200
+                val serialHelper: SerialHelper = object : SerialHelper("/dev/ttyS4", 115200) {
+                    override fun onDataReceived(comBean: ComBean) {
+                        try {
+                            LogUtils.i("读卡", comBean.bRec)
 
-                    if (cardType.toString() == "CPU") {
-                        //发送apdu
-                        startTime = System.currentTimeMillis()
-                        receive = NfcUtil.getInstance().sendAPDU(NfcUtil.toBytes("00A4040009D15600002742444B01"), 1000)
-                        if (receive != null) {
-                            val toHexString = NfcUtil.toHexString(receive)
-                            Log.d(TAG, "limecard APDU receive: $toHexString \n time: ${System.currentTimeMillis() - startTime!!}")
-                            //sendMessage(0,toHexString)
+                            val data = ConvertUtils.bytes2HexString(comBean.bRec)
+                            Log.i(TAG,"limecard 读卡 data " + data)
 
-                            return@launch
-                        }
-                    } else {
-                        val copyOfRange = Arrays.copyOfRange(selectCard.cardNum, 0, 4)
-                        Log.d(TAG, "limecard initCardReader3: $copyOfRange")
-                        val idInfo = NfcUtil.toHexString(copyOfRange)
-                        Log.d(TAG, "limecard receive 卡号 : $idInfo")
-                        Log.d(TAG, "limecard receive  线程号 : ${android.os.Process.myTid()}")
-                        //sendMessage(0,idInfo)
-                        val card: String = ParseData.decodeHexStringIdcard2Int(ByteReverser.reverseHexBytes(idInfo))
-                        Log.i(TAG,"limecard 读卡" + card)
-                        Log.i(TAG,"limecard 读卡================================ " + DifferentDisplay.isStartFaceScan.get())
-                        Log.d(TAG,"limecardcardNumber  CardReader: " + NfcUtil.toHexString(selectCard.cardNum).substring(0,8) + "   cardNumber: " + card)
+                            Log.i(TAG,"limecard 读卡 data data.substring(6, 14) " + data.substring(6, 14))
 
-                        if (DifferentDisplay.isStartFaceScan.get()) {
-                            DifferentDisplay.isStartFaceScan.set(false)
-                            var currentTimes  = System.currentTimeMillis()
+                            val card: String =
+                                ParseData.decodeHexStringIdcard2Int(data.substring(6, 14))
+                            Log.i(TAG,"limecard 读卡 card " +  card)
 
-                            if (((currentTimes - beforeTimes) <= 1100) && beforeCardNumber.equals(card)){
-                                //return@launch
-                                continue
-                            }
-
-                            if ((currentTimes - beforeTimes) < 500){
-                                //return@launch
-                                continue
-                            }else{
-                                beforeTimes = currentTimes
-                            }
-
-
-                            beforeCardNumber = card
-                            EventBus.getDefault().post(
-                                MessageEventBean(
-                                    MessageEventType.AmountCard,
-                                    card
+                            if (DifferentDisplay.isStartFaceScan.get()) {
+                                DifferentDisplay.isStartFaceScan.set(false)
+                                EventBus.getDefault().post(
+                                    MessageEventBean(
+                                        MessageEventType.AmountCard,
+                                        card
+                                    )
                                 )
-                            )
+                            }
+                            LogUtils.e("cardData", card)
+                        } catch (e: Throwable) {
+                            e.printStackTrace()
+                            LogUtils.e("读取卡数据失败", e.localizedMessage)
+                            //读取卡数据失败
                         }
-                        //return@launch
                     }
-
-
                 }
-
-                Log.d(TAG, "limeinitCardReader3:   " + System.currentTimeMillis())
-
+                serialHelper.open()
+            } catch (e: Throwable) {
+                e.printStackTrace()
             }
         }
     }
@@ -722,6 +676,9 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                 LogUtils.e("扫码: 键盘" + barcode)
 
                 Log.e(TAG,"limeparams 571: onScanSuccess ========================================")
+                if (barcode?.length!! > 8) {
+                    onScanCallBack(barcode)
+                }
 //                if(barcode?.length!! > 8) {
 //                    EventBus.getDefault().post(
 //                        MessageEventBean(
@@ -1537,10 +1494,10 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
             //LogUtils.e("按键MainActivity device vendorId: " + event.device.vendorId + " productId: " + event.device.productId)
 
             // 判断当前如果是支付状态,处理USB 扫码枪键盘事件
-            //if (AmountFragment.mIsPaying && (event.keyCode != KeyEvent.KEYCODE_DEL)) {
-            //    keyEventResolver?.analysisKeyEvent(event)
-            //    return true
-            //}
+            if ((mainFragment.amountFragment.isPaying() || mainFragment.amountFragment.isRefund()) && (event.keyCode != KeyEvent.KEYCODE_DEL)) {
+                keyEventResolver?.analysisKeyEvent(event)
+                return true
+            }
 
             if (event.keyCode == KeyEvent.KEYCODE_ENTER || event.keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER) {
                 if (event.action == KeyEvent.ACTION_UP) {

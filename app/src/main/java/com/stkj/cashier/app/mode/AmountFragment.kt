@@ -1312,13 +1312,13 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
 //
 //                }
 
-                "取消" -> {
-                    LogUtils.e("取消" + DifferentDisplay.isStartFaceScan + "/" + mIsRefund)
+                "功能" -> {
+                    LogUtils.e("功能" + DifferentDisplay.isStartFaceScan + "/" + mIsRefund)
                     if (NetworkUtils.isConnected()) {
                         if (isCurrentFixAmountMode) {
                             //退款中
                             if (mIsRefund) {
-                                ttsSpeak("请先点取删除键，再点功能键")
+                                ttsSpeak("请先点取清除键，再点功能键")
                                 return false
                             }
                             if (mIsPaying) {
@@ -1331,7 +1331,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
                                 showRefundList()
                                 scanCodeCallback?.refund()
                             } else {
-                                ttsSpeak("请先点删除键，再点取消键")
+                                ttsSpeak("请先点清除键，再点功能键")
                             }
                         }
 
@@ -1455,7 +1455,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
                 -> {
                     //退款中
                     if (mIsRefund) {
-                        ttsSpeak("请先点取删除键，再点统计键")
+                        ttsSpeak("请先点取清除键，再点查询键")
                         return false
                     }
                     if (!App.mShowConsumeStat) {

@@ -3,7 +3,7 @@
 
     <!--//设备厂商+产品+设备型号 更新字段-->
     <!--<string name="deviceType1">"huayi"</string>-->
-    <string name="deviceType">cashier_telpo_tps580_face</string>
+    <string name="deviceType">cashier_jieyuyun_taishi</string>
    <!-- <string name="deviceType">maibaole_3399</string>-->
 
     <!-- Error -->

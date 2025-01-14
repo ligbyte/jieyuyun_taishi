@@ -351,7 +351,7 @@
             android:layout_height="50dp"
             android:layout_gravity="bottom"
             android:gravity="center"
-            android:text="请点击键盘[上翻][下翻]选择时间，删除键返回，确认键刷新数据"
+            android:text="请点击键盘[上翻][下翻]选择时间，清除键返回，确认键刷新数据"
             android:textColor="#00dc82"
             android:textSize="22sp" />
 
