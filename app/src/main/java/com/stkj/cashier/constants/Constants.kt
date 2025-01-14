@@ -110,6 +110,7 @@ object Constants {
     //消费模式设置页面
     const val FRAGMENT_SET = "ConsumptionSettingFragment"
 
-
+    //消费模式设置页面
+    const val FRAGMENT_AMOUNT = "AmountFragment"
     //---------------------------------------------
 }

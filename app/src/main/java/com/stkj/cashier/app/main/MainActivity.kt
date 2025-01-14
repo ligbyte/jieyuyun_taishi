@@ -1493,37 +1493,38 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
             LogUtils.e("按键MainActivity keyCode: " + event.keyCode + "  device: " + event.device.name)
             //LogUtils.e("按键MainActivity device vendorId: " + event.device.vendorId + " productId: " + event.device.productId)
 
-            // 判断当前如果是支付状态,处理USB 扫码枪键盘事件
-            if ((mainFragment.amountFragment.isPaying() || mainFragment.amountFragment.isRefund()) && (event.keyCode != KeyEvent.KEYCODE_DEL)) {
-                keyEventResolver?.analysisKeyEvent(event)
-                return true
-            }
 
-            if (event.keyCode == KeyEvent.KEYCODE_ENTER || event.keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER) {
+
+            if (event.keyCode == KeyEvent.KEYCODE_ENTER || event.keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER || event.keyCode == KeyEvent.KEYCODE_F1 || event.keyCode == KeyEvent.KEYCODE_DEL) {
                 if (event.action == KeyEvent.ACTION_UP) {
                     val content = keyEventResolver?.getInputCode(event)
-//                EventBus.getDefault()
-//                    .post(MessageEventBean(MessageEventType.KeyEventNumber, content))
                     dispatchEvent(MessageEventBean(MessageEventType.KeyEventNumber, content))
                 }
                 return true
             }
+            Log.d(TAG, "limeonKeyEvent3 ========> 1511 " + keyEventResolver?.getInputCode(event))
             if (event.keyCode == KeyEvent.KEYCODE_DPAD_UP || event.keyCode == KeyEvent.KEYCODE_DPAD_DOWN || event.keyCode == KeyEvent.KEYCODE_DPAD_LEFT || event.keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
                 if (event.action == KeyEvent.ACTION_UP) {
                     val content = keyEventResolver?.getInputCode(event)
-//                EventBus.getDefault()
-////                    .post(MessageEventBean(MessageEventType.KeyEventNumber, content))
                     dispatchEvent(MessageEventBean(MessageEventType.KeyEventNumber, content))
                 }
+                return true
+            }
+
+
+            // 判断当前如果是支付状态,处理USB 扫码枪键盘事件
+            if ((mainFragment.amountFragment.isPaying() || mainFragment.amountFragment.isRefund()) && !SPUtils.getInstance().getBoolean(Constants.FRAGMENT_SET)) {
+                keyEventResolver?.analysisKeyEvent(event)
                 return true
             }
 
             if (event.action == KeyEvent.ACTION_UP) {
                 val content = keyEventResolver?.getInputCode(event)
-                //EventBus.getDefault().post(MessageEventBean(MessageEventType.KeyEventNumber, content))
                 dispatchEvent(MessageEventBean(MessageEventType.KeyEventNumber, content))
                 LogUtils.e("按键" + content)
             }
+
+
 
         } catch (e: Exception) {
             LogUtils.e("按键异常" + e.message)
@@ -1532,6 +1533,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
     }
 
     private fun dispatchEvent(message: MessageEventBean) {
+        Log.d(TAG, "limeonKeyEvent3 ========> dispatchEvent " + message.ext)
         mainFragment.amountFragment.onHandleEventMsg(message)
         consumption1SettingFragment.onHandleEventMsg(message)
         mainFragment.amountFragment.consumeStatFragment.onHandleEventMsg(message)

@@ -102,6 +102,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
         @Volatile
         var mIsPaying = false
     }
+
     @SuppressLint("CheckResult")
     override fun initData(savedInstanceState: Bundle?) {
         super.initData(savedInstanceState)
@@ -1058,6 +1059,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
     }
 
     fun onKeyEvent3(inputCode: String?): Boolean {
+        Log.d(TAG, "limeonKeyEvent3 ========> onKeyEvent3 " + inputCode)
         if (!TextUtils.isEmpty(inputCode)) {
             when (inputCode) {
                 "0",
@@ -1807,6 +1809,10 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
 
     fun isRefund():Boolean{
         return binding.tvTitle.text.toString().contains("以确认可退款订单")
+    }
+
+    fun isCurrentFixAmountMode():Boolean{
+        return isCurrentFixAmountMode
     }
 
 }
