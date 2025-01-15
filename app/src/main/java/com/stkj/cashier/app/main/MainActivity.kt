@@ -2,6 +2,7 @@ package com.stkj.cashier.app.main
 
 import android.annotation.SuppressLint
 import android.app.ActivityManager
+import android.app.AlertDialog
 import android.app.Notification
 import android.content.Context
 import android.content.Intent
@@ -26,6 +27,8 @@ import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
+import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.NonNull
@@ -100,6 +103,7 @@ import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.nio.charset.StandardCharsets
 import java.util.LinkedList
+import java.util.Objects
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -139,10 +143,10 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
     var latch: CountDownLatch? = null
 
 
-    //lateinit var progressDialog: AlertDialog //更新进度弹窗
-    //lateinit var allFaceDownDialog: AlertDialog //全量人脸
+    lateinit var progressDialog: AlertDialog //更新进度弹窗
+    lateinit var allFaceDownDialog: AlertDialog //全量人脸
     lateinit var tvProgress: TextView
-    //lateinit var sbProgress: ProgressBar
+    lateinit var sbProgress: ProgressBar
 
     var allFaceDown: Boolean = false
     private val timestampList = LinkedList<Long>()
@@ -1356,31 +1360,28 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
      * */
     fun showUpdataProgressDialog(data: CheckAppVersionBean?) {
         LogUtils.e("显示更新进度条")
-
-        Log.d(TAG,"limecheckAppVersion 显示更新进度条 1358")
-
-        //黑屏 begin
-
-//        val builder = AlertDialog.Builder(this, R.style.app_dialog)
-//        progressDialog = builder.create()
-//        progressDialog.setCancelable(false)
-//        val view = View.inflate(this, R.layout.dialog_updata_version_progress, null)
-//        tvProgress = view.findViewById<TextView>(R.id.tvProgress)
-//        sbProgress = view.findViewById<ProgressBar>(R.id.sbProgress)
-//        sbProgress.isEnabled = false
-//        progressDialog.show()
-//        LogUtils.e("显示更新进度条show")
-//        progressDialog.window!!.setLayout(
-//            (ScreenUtils.getAppScreenWidth() * 0.32).toInt(),
-//            LinearLayout.LayoutParams.WRAP_CONTENT
-//        )
-//
-//        Objects.requireNonNull(progressDialog.window)!!.setContentView(view)
-
-        //黑屏 end
+        val builder = AlertDialog.Builder(this, R.style.app_dialog)
+        progressDialog = builder.create()
+        progressDialog.setCancelable(false)
+        val view = View.inflate(this, R.layout.dialog_updata_version_progress, null)
+        tvProgress = view.findViewById<TextView>(R.id.tvProgress)
+        sbProgress = view.findViewById<ProgressBar>(R.id.sbProgress)
+        sbProgress.isEnabled = false
+        /*if ("1" == data?.versionForce) {
+            tvCancel.visibility = View.GONE
+            progressDialog.setCancelable(false)
+        }*/
+        // 处理文件名
+        // 处理文件名
+        progressDialog.show()
+        LogUtils.e("显示更新进度条show")
+        progressDialog.window!!.setLayout(
+            (ScreenUtils.getAppScreenWidth() * 0.32).toInt(),
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+        Objects.requireNonNull(progressDialog.window)!!.setContentView(view)
 
         val path: String = makeDownloadPath()
-        Log.d(TAG,"limecheckAppVersion 显示更新进度条 1381")
         UpdateService.Builder.create(data?.url)
             .setStoreDir(path)
             .setIcoResId(R.mipmap.ic_main_logo)
@@ -1428,7 +1429,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
 //                binding.mainView.visibility = View.VISIBLE
                 if (progressDialog != null && progressDialog.isShowing) {
                     tvProgress.text = "" + message.obj
-                    //sbProgress.progress = message.obj as Int
+                    sbProgress.progress = message.obj as Int
                 }
             }
 

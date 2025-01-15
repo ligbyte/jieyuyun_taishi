@@ -26,12 +26,11 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.content.FileProvider;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.stkj.cashier.util.util.AppUtils;
-import com.stkj.cashier.util.util.LogUtils;
 import com.stkj.cashier.App;
 import com.stkj.cashier.R;
 import com.stkj.cashier.bean.MessageEventBean;
 import com.stkj.cashier.config.MessageEventType;
+import com.stkj.cashier.util.util.AppUtils;
 //import com.common.api.system.SystemApiUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -335,46 +334,34 @@ public class UpdateService extends Service {
     }
 
     private void success(String path) {
-        try {
-            builder.setProgress(0, 0, false);
-            builder.setContentText(getString(R.string.update_app_model_success));
-            Intent i = installIntent(path);
-            PendingIntent intent = PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
-            builder.setContentIntent(intent);
-            builder.setDefaults(downloadSuccessNotificationFlag);
-            Notification n = builder.build();
-            n.contentIntent = intent;
-            manager.notify(notifyId, n);
-            sendLocalBroadcast(UPDATE_SUCCESS_STATUS, 100);
-            if (updateProgressListener != null) {
-                updateProgressListener.success();
-            }
-            //静默安装指定路径下的apk
-            LogUtils.e("下载地址" + path);
+        builder.setProgress(0, 0, false);
+        builder.setContentText(getString(R.string.update_app_model_success));
+        Intent i = installIntent(path);
+        PendingIntent intent = PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setContentIntent(intent);
+        builder.setDefaults(downloadSuccessNotificationFlag);
+        Notification n = builder.build();
+        n.contentIntent = intent;
+        manager.notify(notifyId, n);
+        sendLocalBroadcast(UPDATE_SUCCESS_STATUS, 100);
+        if (updateProgressListener != null) {
+            updateProgressListener.success();
+        }
+        //静默安装指定路径下的apk
+        Log.e(TAG,"下载地址" + path);
        /* YF_RK3399_API_Manager yfapi = new YF_RK3399_API_Manager(this);
         yfapi.yfslientinstallapk(path);
 
 
         AppUtils.installApp(path);*/
-            sendLocalBroadcast("android.intent.action.application", "quiet_install", path);
-            // 静默安装APK
-//        RkSysTool.getInstance().installSlientApk(App.applicationContext, path,true);
+
+        // 静默安装APK
+        RkSysTool.getInstance().installSlientApk(App.applicationContext, path,true);
 //        RkSysTool.silenceInstallApk(App.applicationContext, path, null);
 //        InstallUtils.install28(App.applicationContext, path, InstallResultReceiver.class);
 //        new SystemApiUtil(this).installApp(path,"com.stkj.cashier");
 
-            stopSelf();
-
-        }catch (Exception e){
-
-        }
-    }
-
-    private void sendLocalBroadcast(String action,String key, String value) {
-        Intent intent = new Intent(action);
-        intent.putExtra(key, value);
-        intent.putExtra("packName", "com.stkj.cashier");
-        sendBroadcast(intent);
+        stopSelf();
     }
 
     private void error() {
@@ -477,11 +464,11 @@ public class UpdateService extends Service {
                                 + ",current currentSize is" + currentSize + ",current updateTotalSize is" + updateTotalSize
                                 + ",current readSize is" + readSize);
                     }
-                    LogUtils.e("0进度条"+ i +"/"+ progress);
+                    Log.e(TAG,"0进度条"+ i +"/"+ progress);
                     if (i !=progress){
                         progress= i;
                         EventBus.getDefault().post(new MessageEventBean(MessageEventType.ProgressNumber, progress));
-                        LogUtils.e("进度条"+ i +"/"+ progress);
+                        Log.e(TAG,"进度条"+ i +"/"+ progress);
                     }
                 }
                 // download success
