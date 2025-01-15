@@ -30,6 +30,7 @@ interface MessageEventType {
 
         const val HeadBeat = 1120
         const val AmountSuccess = 1130
+        const val AmountQuerySuccess = 1108
         const val AmountCancel = 1132 //金额模式 取消支付
         const val ModifyBalanceError = 1134 //支付异常
 
@@ -53,6 +54,7 @@ interface MessageEventType {
 
         // 刷卡
         const val AmountCard = 1100
+        const val AmountCardQuery = 1107
         const val NumberCard = 1101
         const val PickUpPhoneCard = 1102 // 取餐模式  手机号码取餐 读卡/取餐码
         const val PickUpCard = 1112 //取餐码取餐

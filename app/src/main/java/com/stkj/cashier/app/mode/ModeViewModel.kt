@@ -37,6 +37,7 @@ class ModeViewModel @Inject constructor(application: Application, model: BaseMod
 
     val liveData by lazy { MutableLiveData<MutableList<Bean>>() }
     val modifyBalance by lazy { MutableLiveData<Result<ModifyBalanceBean>>() }
+    val queryBalance by lazy { MutableLiveData<Result<QueryBalanceBean>>() }
     val consumeRecord by lazy { MutableLiveData<ConsumeRecordListBean>() }
     val takeMealsList by lazy { MutableLiveData<TakeMealsListResult>() } //订餐信息列表
     val takeMeals by lazy { MutableLiveData<Result<TakeMealsBean>>() } //已出餐的订单信息
@@ -86,12 +87,6 @@ class ModeViewModel @Inject constructor(application: Application, model: BaseMod
     }
 
     fun modifyBalance(params: Map<String, Any>) {
-        var currentParams = GsonUtils.toJson(params)
-//        if (beforeparams.equals(currentParams)){
-//            return
-//        }else{
-//            beforeparams = currentParams
-//        }
         if (SystemUtils.isNetWorkActive(getApp())) {
             launch(false, block = {
                 // TODO Http请求
@@ -119,6 +114,34 @@ class ModeViewModel @Inject constructor(application: Application, model: BaseMod
                 //金额模式
                 EventBus.getDefault().post(MessageEventBean(MessageEventType.AmountCancel))
                 EventBus.getDefault().post(MessageEventBean(MessageEventType.ModifyBalanceError))
+            })
+        } else {
+            ttsSpeak(getString(R.string.result_network_unavailable_error))
+            //金额模式
+            EventBus.getDefault().post(MessageEventBean(MessageEventType.AmountCancel))
+        }
+
+
+    }
+
+    fun queryBalance(params: Map<String, Any>) {
+        if (SystemUtils.isNetWorkActive(getApp())) {
+            launch(false, block = {
+                val result = apiService.queryBalance(params)
+                queryBalance.value = result
+            }, error = {
+                Timber.w(it)
+                if (SystemUtils.isNetWorkActive(getApp())) {
+                    when (it) {
+                        is SocketTimeoutException -> ttsSpeak("网络连接超时")
+                        is ConnectException -> ttsSpeak("网络连接失败")
+                        else -> ttsSpeak("系统异常,请重试")
+                    }
+                } else {
+                    ttsSpeak("网络已断开，请检查网络。")
+                }
+                //金额模式
+                EventBus.getDefault().post(MessageEventBean(MessageEventType.AmountCancel))
             })
         } else {
             ttsSpeak(getString(R.string.result_network_unavailable_error))

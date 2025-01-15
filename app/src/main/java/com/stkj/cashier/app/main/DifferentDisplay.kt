@@ -66,6 +66,7 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
 //    private lateinit var tvWifiState: TextView
 
     private lateinit var tvRefundName: TextView
+    private lateinit var tvPaySuccess: TextView
     private lateinit var tvNumber: TextView
     private lateinit var ivHeader2: ImageView
     private lateinit var rvRefund: RecyclerView
@@ -152,11 +153,13 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
         tvPayError = findViewById(R.id.tv_pay_error);
 
         tvNumber = findViewById<TextView>(R.id.tvNumber)
+            tvPaySuccess = findViewById<TextView>(R.id.tvPaySuccess)
         tvWindow = findViewById<TextView>(R.id.tvWindow)
         tvRefundName = findViewById<TextView>(R.id.tvRefundName)
         tvRefundName2 = findViewById<TextView>(R.id.tvRefundName2)
         ivHeader2 = findViewById<ImageView>(R.id.ivHeader2)
         rvRefund = findViewById<RecyclerView>(R.id.rvRefund)
+
 
         val ctvConsumer = findViewById<CommonTipsView>(R.id.ctv_consumer);
         CommonTipsHelper.INSTANCE.setConsumerTipsView(ctvConsumer)
@@ -622,6 +625,21 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
         tvFaceTips.visibility = View.GONE
         llBalance.visibility = View.VISIBLE
         tvPayMoney.text = "¥ $payMoney"
+        tvPaySuccess.text = "支付成功"
+        SpanUtils.with(tvBalance)
+            .append("账户余额：")
+            .append("¥ $balance")
+            .setFontSize(50, true)
+            .create()
+    }
+
+    private fun showQueryBalance(payMoney: String, balance: String,fullName :String) {
+        flCameraAvatar.visibility = View.GONE
+        tvFaceTips2.visibility = View.GONE
+        tvFaceTips.visibility = View.GONE
+        llBalance.visibility = View.VISIBLE
+        tvPayMoney.text = fullName
+        tvPaySuccess.text = "查询成功"
         SpanUtils.with(tvBalance)
             .append("账户余额：")
             .append("¥ $balance")
@@ -746,6 +764,40 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
                     message.ext?.let { showBalance(message.realPayMoney!!, it) }
                 } else {
                     message.ext?.let { showBalance(realAmount, it) }
+                }
+
+                realAmount = "0.0"
+
+                Observable.timer(1500, TimeUnit.MILLISECONDS)
+                    .subscribeOn(Schedulers.io()) // 在IO调度器上订阅
+                    .observeOn(AndroidSchedulers.mainThread()) // 在主线程上观察
+                    .subscribe(
+                        { aLong: Long? ->
+                            // 这里的代码会在3秒后执行一次
+                            hidePayError()
+                            hideBalance()
+                            hideSuccessFace()
+                            tvFaceTips2.visibility = View.GONE
+
+                            tvFaceTips.visibility = View.VISIBLE
+                            tvFaceTips.text = "欢迎就餐"
+                        }
+                    ) { throwable: Throwable? ->
+                        // 当发生错误时，这里的代码会被执行
+                        Log.e("RxJava", "Error", throwable)
+                    }
+
+            }
+
+            MessageEventType.AmountQuerySuccess -> {
+                message.content?.let {
+                    companyMember = CompanyMemberBiz.getCompanyMemberByCard(message.content)
+                }
+
+                if (message.realPayMoney != null) {
+                    message.ext?.let { showQueryBalance(message.realPayMoney!!, it ,message.obj.toString()) }
+                } else {
+                    message.ext?.let { showQueryBalance(realAmount, it ,message.obj.toString()) }
                 }
 
                 realAmount = "0.0"

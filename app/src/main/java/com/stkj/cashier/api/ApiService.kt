@@ -65,6 +65,12 @@ interface ApiService {
     suspend fun modifyBalance(@QueryMap params: Map<String, Any>): Result<ModifyBalanceBean>
 
     /**
+     * 设备查询余额
+     */
+    @GET("home/v2/index")
+    suspend fun queryBalance(@QueryMap params: Map<String, Any>): Result<QueryBalanceBean>
+
+    /**
      * 设备查询消费记录接口
      */
     @GET("home/v2/index")

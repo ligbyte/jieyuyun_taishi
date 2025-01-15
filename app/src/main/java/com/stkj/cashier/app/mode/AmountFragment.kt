@@ -315,6 +315,58 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
 
         }
 
+            viewModel.queryBalance.observe(this) {
+                LogUtils.e("modifyBalance observe")
+                if (it.code == 10000) {
+                    scanCodeCallback?.stopScan()
+                    ttsSpeak("查询成功")
+                    val message = MessageEventBean(
+                        MessageEventType.AmountQuerySuccess,
+                        it.data?.customerNo,
+                        it.data?.consumptionMone
+                    )
+                    message.ext = it.data?.balance
+                    message.obj = it.data?.fullName
+                    message.realPayMoney = it.data?.consumptionMone.toString()
+                    EventBus.getDefault().post(message)
+                    scanningCode = ""
+
+                    binding.tvFixAmountModeStatus.text = "查询成功"
+                    binding.tvFixAmountModeStatus.background = null
+                    binding.tvFixAmountModeStatus.setTextColor(Color.parseColor("#00DC82"))
+                    binding.tvStatus.text = "查询成功"
+                    binding.tvStatus.setTextColor(Color.parseColor("#00DC82"))
+
+                    Observable.timer(1500, TimeUnit.MILLISECONDS)
+                        .subscribeOn(Schedulers.io()) // 在IO调度器上订阅
+                        .observeOn(AndroidSchedulers.mainThread()) // 在主线程上观察
+                        .subscribe(
+                            { aLong: Long? ->
+                                // 这里的代码会在3秒后执行一次
+
+                                mIsPaying = false
+
+                                binding.tvFixAmountModeStatus.text = "定额模式"
+                                binding.tvFixAmountModeStatus.setBackgroundResource(R.drawable.bg_select_checkbox_selected)
+                                binding.tvFixAmountModeStatus.setTextColor(Color.parseColor("#00DC82"))
+                                binding.tvStatus.text = "-"
+                                scanCodeCallback?.stopScan()
+                                binding.tvStatus.setTextColor(Color.parseColor("#ffffff"))
+                                binding.tvAmount.text = ""
+
+                            }
+                        ) { throwable: Throwable? ->
+                            // 当发生错误时，这里的代码会被执行
+                            Log.e("RxJava", "Error", throwable)
+                        }
+                } else if (it.code == 10009) {
+                    ttsSpeak("查询中")
+                } else {
+                    ttsSpeak("查询失败")
+                }
+
+            }
+
         viewModel.consumeRefundResult.observe(this) {
             LogUtils.d("consumeRefundResult observe")
             if (it.code == 10000) {
@@ -546,6 +598,26 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
 
     }
 
+    private fun queryBalanceByCard(card: String) {
+        Log.d(TAG,"limequeryBalanceByCard: " + card)
+        if (card != null && !TextUtils.isEmpty(card)) {
+            var map = hashMapOf<String, Any>()
+            map["mode"] = "BalanceQuery"
+            map["cardNumber"] = card
+            map["machine_Number"] = App.serialNumber
+            var md5 = EncryptUtils.encryptMD5ToString16(card + "&" + App.serialNumber)
+            map["sign"] = md5
+            Log.d(TAG, "limecardparams 502: " + GsonUtils.toJson(map))
+            viewModel.queryBalance(map)
+
+        }  else {
+            ttsSpeak("无信息")
+            isStartFaceScan.set(true)
+        }
+
+
+    }
+
     public fun modifyBalanceByScanCode(card: String) {
         if (!TextUtils.isEmpty(card)) {
             var card = card.replace("\r", "")
@@ -737,6 +809,17 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
                         Log.d(TAG,"limecard cardData" + 707)
                         refreshPayingStatus()
                         modifyBalanceByCard(it)
+                    }
+                }
+            }
+
+            MessageEventType.AmountCardQuery -> {
+                message.content?.let {
+                    if (mIsRefund) {
+                        searchConsumeRefundList(it)
+                        Log.d(TAG,"limecard cardData" + 698)
+                    } else {
+                        queryBalanceByCard(it)
                     }
                 }
             }
@@ -1805,6 +1888,25 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
             return false
         }
         return getTvStatus().equals("支付中") || isCurrentFixAmountMode
+    }
+
+    fun isAmountZero():Boolean{
+        val text = binding.tvAmount.text.toString().trim()
+
+        // 检查是否为纯数字（包括正数和负数）
+        if (text.isEmpty()) {
+            return true  // 如果文本为空，返回 true 表示无效
+        }
+
+        // 尝试将字符串转换为 BigDecimal 类型，并检查是否为纯数字
+        return try {
+            val amount = BigDecimal(text)
+            // 判断数值是否大于 0
+            amount.compareTo(BigDecimal.ZERO) > 0
+        } catch (e: NumberFormatException) {
+            // 如果转换失败或不是纯数字，返回 true 表示无效
+            true
+        }
     }
 
     fun isRefund():Boolean{

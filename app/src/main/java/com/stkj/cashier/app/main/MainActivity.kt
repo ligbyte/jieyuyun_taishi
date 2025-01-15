@@ -137,6 +137,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
     var face_def_Count = 0;
     var totalFaceCount = 0;
     var beforeCardNumber = "";
+    var amountCardQueryTime = 0L;
     var mainFragment:MainFragment = MainFragment.newInstance();
     var consumption1SettingFragment:Consumption1SettingFragment = Consumption1SettingFragment.newInstance();
 
@@ -187,6 +188,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
 
         }
 
+            handlePayLogic()
 
     } catch (e: Throwable) {
         e.printStackTrace()
@@ -221,7 +223,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                                 ParseData.decodeHexStringIdcard2Int(data.substring(6, 14))
                             Log.i(TAG,"limecard 读卡 card " +  card)
 
-                            if (DifferentDisplay.isStartFaceScan.get()) {
+                            if (DifferentDisplay.isStartFaceScan.get() && (mainFragment.amountFragment.isPaying() || mainFragment.amountFragment.isRefund())) {
                                 DifferentDisplay.isStartFaceScan.set(false)
                                 EventBus.getDefault().post(
                                     MessageEventBean(
@@ -229,6 +231,20 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                                         card
                                     )
                                 )
+                            }else{
+                                Log.d(TAG,"limequeryBalanceByCard mainFragment.amountFragment.isAmountZero(): " + mainFragment.amountFragment.isAmountZero())
+                                if (mainFragment.amountFragment.isAmountZero()) {
+                                    if ((System.currentTimeMillis() - amountCardQueryTime) < 2000) {
+                                        return
+                                    }
+                                    amountCardQueryTime = System.currentTimeMillis()
+                                    EventBus.getDefault().post(
+                                        MessageEventBean(
+                                            MessageEventType.AmountCardQuery,
+                                            card
+                                        )
+                                    )
+                                }
                             }
                             LogUtils.e("cardData", card)
                         } catch (e: Throwable) {
