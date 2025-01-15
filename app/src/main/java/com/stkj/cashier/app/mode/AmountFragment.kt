@@ -992,7 +992,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
     /**
      * 取消支付
      */
-    private fun cancelAmountPay() {
+    public fun cancelAmountPay() {
         if (mPayErrorRetry != null) {
             mPayErrorRetry!!.dispose()
             mPayErrorRetry = null

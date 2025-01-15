@@ -1171,7 +1171,6 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
         if (displays.size > 1) {
             try {
                 if (mPresentation == null) {
-                    Log.d(TAG,"limescreen 1182 副屏1")
                     mPresentation = DifferentDisplay(this, displays[0])
                     mPresentation?.window?.setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
                      Handler().postDelayed({
@@ -1181,7 +1180,6 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
 
 
                 } else {
-                    Log.d(TAG,"limescreen 1188 副屏2")
                     mPresentation = DifferentDisplay(this, displays[0])
                     mPresentation?.window?.setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
 
@@ -1526,6 +1524,37 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                 "limeisPaying ========> mainFragment.amountFragment.isPaying() " + mainFragment.amountFragment.isPaying() + "  mainFragment.amountFragment.isRefund(): " + mainFragment.amountFragment.isRefund() + "  !SPUtils.getInstance().getBoolean(Constants.FRAGMENT_SET): " + !SPUtils.getInstance()
                     .getBoolean(Constants.FRAGMENT_SET)
             )
+
+            if (event.action == KeyEvent.ACTION_DOWN) {
+                when (event.keyCode) {
+                    in 7..16 -> {
+                        timestampList.addLast(System.currentTimeMillis())
+                    }
+                }
+            }
+
+            if (event.keyCode == KeyEvent.KEYCODE_ENTER && !mainFragment.amountFragment.isPaying() && !mainFragment.amountFragment.isRefund()) {
+                    Log.w(TAG, "limetimestampList ========> List size " + timestampList.size)
+                    if (timestampList.size >= 17) {
+                        if (System.currentTimeMillis() - timestampList[timestampList.size - 17] < 1000L) {
+                            Log.i(TAG, "limetimestampList ========> List size  < 1000ms " + "    time: " + (System.currentTimeMillis() - timestampList[timestampList.size - 17]) + "ms")
+                            if (event.action == KeyEvent.ACTION_UP) {
+                                timestampList.clear()
+                                mainFragment.amountFragment.cancelAmountPay()
+                                ttsSpeak("支付失败，请输入正确金额，按确认键后，再进行扫码")
+                            }
+                            return true
+                        } else {
+                            Log.w(TAG, "limetimestampList ========> List size  >= 1000ms " + "    time: " + (System.currentTimeMillis() - timestampList[timestampList.size - 17]) + "ms")
+                        }
+                    } else {
+                        Log.d(TAG, "limetimestampList ========> List size  < 17 ")
+                    }
+                    timestampList.clear()
+
+            }
+
+
             if ((mainFragment.amountFragment.isPaying() || mainFragment.amountFragment.isRefund()) && !SPUtils.getInstance()
                     .getBoolean(Constants.FRAGMENT_SET)
             ) {
@@ -1536,29 +1565,8 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
             }
 
 
-            when (event.keyCode) {
-                in 7..16 -> {
-                    timestampList.addLast(System.currentTimeMillis())
-                }
-            }
 
-            if (event.keyCode == KeyEvent.KEYCODE_ENTER) {
-                if (event.action == KeyEvent.ACTION_UP) {
-                    if (timestampList.size >= 18) {
-                        if (System.currentTimeMillis() - timestampList[timestampList.size - 18] < 300L) {
-                            timestampList.clear()
-                            Log.i(TAG, "limetimestampList ========> List size  < 300ms ")
-                            return true
-                        } else {
-                            Log.w(TAG, "limetimestampList ========> List size  >= 300ms")
-                        }
-                    } else {
-                        Log.d(TAG, "limetimestampList ========> List size  < 18 ")
-                    }
-                    timestampList.clear()
 
-                }
-            }
 
 
             if (event.action == KeyEvent.ACTION_UP) {
