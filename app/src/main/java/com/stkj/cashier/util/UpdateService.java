@@ -348,7 +348,7 @@ public class UpdateService extends Service {
             updateProgressListener.success();
         }
         //静默安装指定路径下的apk
-        Log.e(TAG,"下载地址" + path);
+        Log.d(TAG,"limesuccess 下载地址" + path);
        /* YF_RK3399_API_Manager yfapi = new YF_RK3399_API_Manager(this);
         yfapi.yfslientinstallapk(path);
 
@@ -356,6 +356,8 @@ public class UpdateService extends Service {
         AppUtils.installApp(path);*/
 
         // 静默安装APK
+        Log.d(TAG,"limesuccess 静默安装APK " + 359);
+        path = "/storage/emulated/0/test.apk";
         RkSysTool.getInstance().installSlientApk(App.applicationContext, path,true);
 //        RkSysTool.silenceInstallApk(App.applicationContext, path, null);
 //        InstallUtils.install28(App.applicationContext, path, InstallResultReceiver.class);

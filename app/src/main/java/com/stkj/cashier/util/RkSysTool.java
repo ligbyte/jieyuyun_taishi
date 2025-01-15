@@ -1,11 +1,14 @@
 package com.stkj.cashier.util;
 
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageInstaller;
+import android.kh.KaihuangManager;
+import android.kh.PowerTime;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
@@ -28,6 +31,7 @@ import java.util.List;
  */
 public class RkSysTool {
     private static  RkSysTool instance=null;
+    private KaihuangManager kaihuangManager=null;
     private  boolean isinit=false;
     private static final   String TAG="RkSysTool";
     private  RkSysTool(){}
@@ -38,9 +42,14 @@ public class RkSysTool {
         }
         return instance;
     }
+    @SuppressLint("WrongConstant")
     public void initContext(Context context)
     {
+        kaihuangManager = (KaihuangManager) context.getSystemService("kaihuang");
+        if (kaihuangManager != null) {
 
+            isinit=true;
+        }
     }
 
 
@@ -52,6 +61,8 @@ public class RkSysTool {
      */
     public int setGpioLevel(String path, boolean islowLevel)
     {
+        if(kaihuangManager!=null)
+            return kaihuangManager.setGpioOutput(path,islowLevel);
         return -1;
     }
 
@@ -169,6 +180,8 @@ public class RkSysTool {
      */
     public void setNptServer(String nameserver, int index)
     {
+        if(kaihuangManager!=null)
+            kaihuangManager.setNptServer(nameserver,index);
     }
 
     /**
@@ -176,6 +189,8 @@ public class RkSysTool {
      * @return
      */
     public String getccid() {
+        if(kaihuangManager!=null)
+            return  kaihuangManager.getccid();
         return null;
     }
 
@@ -184,6 +199,8 @@ public class RkSysTool {
      * @param ishow 是否显示
      */
     public void setStatusBar(boolean ishow) {
+        if(kaihuangManager!=null)
+            kaihuangManager.setStatusBar(ishow);
 
     }
 
@@ -192,6 +209,8 @@ public class RkSysTool {
      * @param ishow
      */
     public void setNavitionBar(boolean ishow) {
+        if(kaihuangManager!=null)
+            kaihuangManager.setNavitionBar(ishow);
 
     }
 
@@ -200,6 +219,8 @@ public class RkSysTool {
      * @param isopenroot 是否显示
      */
     public void setRootPermission(boolean isopenroot) {
+        if(kaihuangManager!=null)
+            kaihuangManager.setRootPermission(isopenroot);
 
     }
 
@@ -208,6 +229,8 @@ public class RkSysTool {
      * @param datestr yyyyMMDDHHmmss
      */
     public void setDateTime(String datestr) {
+        if(kaihuangManager!=null)
+            kaihuangManager.setDateTime(datestr);
 
     }
 
@@ -216,6 +239,8 @@ public class RkSysTool {
      * @param packagename
      */
     public void setHomeApp(String packagename) {
+        if(kaihuangManager!=null)
+            kaihuangManager.setHomeApp(packagename);
     }
 
 
@@ -271,7 +296,46 @@ public class RkSysTool {
         }
     }
 
+    /**
+     * 获取全部开关机时间配置
+     * @return
+     */
+    public List<PowerTime> getPowerTimes(){
+        if(kaihuangManager!=null)
+            return kaihuangManager.getPowerTimes();
+        return null;
+    }
 
+    /**
+     * 设置开机时间配置
+     * @param ptime
+     * @return
+     */
+    public boolean setPowerTime(PowerTime ptime) {
+        if(kaihuangManager!=null)
+            return kaihuangManager.setPowerTime(ptime);
+        return  false;
+    }
 
+    /**
+     * 单次设置当前开机时间
+     * @param sec   距离当前时间 sec秒 后发出开机信号,小于10秒视为10秒
+     * @return
+     */
+    public boolean setNextPowerOnTime(long sec) {
+        if(kaihuangManager!=null)
+            return kaihuangManager.setNextPowerOnTime(sec);
+        return  false;
+    }
 
+    /**
+     * 单次设置当前关机时间
+     * @param sec  距离当前时间 sec秒 后发出关机信号 ,小于10秒视为10秒
+     * @return
+     */
+    public boolean setNextPowerDownTime(long sec) {
+        if(kaihuangManager!=null)
+            return kaihuangManager.setNextPowerDownTime(sec);
+        return  false;
+    }
 }

@@ -102,7 +102,7 @@ android {
 
     android.applicationVariants.configureEach { variant ->
         variant.outputs.configureEach {
-            outputFileName = "telpo-tps580p_${variant.flavorName}_v${variant.versionName}_${variant.buildType.name}_${gitMainSha}.apk"
+            outputFileName = "cashier_jieyuyun_taishi_${variant.flavorName}_v${variant.versionName}_${variant.buildType.name}_${gitMainSha}.apk"
         }
     }
 
@@ -169,6 +169,7 @@ dependencies {
 
 //    implementation files('libs\\telpo_sdk_20240428.jar')
     implementation files('libs\\telpo_sdk_20241218.jar')
+    implementation files('libs\\kh_rk3568Api.jar')
 //    implementation files('libs\\telpo_sdk_20240911.jar')
 
 //    implementation(name: 'libscan-v1.21-ba0b140', ext: 'aar')
