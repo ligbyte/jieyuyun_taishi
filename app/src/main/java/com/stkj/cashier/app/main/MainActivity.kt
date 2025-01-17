@@ -248,7 +248,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                                 )
                             }else{
                                 Log.d(TAG,"limequeryBalanceByCard mainFragment.amountFragment.isPaying(): " + mainFragment.amountFragment.isPaying())
-                                if (!mainFragment.amountFragment.isRefund() && !mainFragment.amountFragment.isPaying()) {
+                                if (!mainFragment.amountFragment.isRefund() && !mainFragment.amountFragment.showPayStatus()) {
                                     if ((System.currentTimeMillis() - amountCardQueryTime) < 2000) {
                                         return
                                     }
@@ -357,11 +357,17 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
 
         Log.e(TAG,"limeparams 247: onScanCallBack ========================================")
 
-        if(data?.length!! > 8){
-            if (mainFragment.amountFragment.isPaying() || mainFragment.amountFragment.isRefund()) {
+        if(data?.length!! > 16){
+
+            if (mainFragment.amountFragment.isRefundListShow()){
+                return
+            }
+
+            if ((mainFragment.amountFragment.isPaying() || mainFragment.amountFragment.isRefund())) {
+
                 var currentTimes  = System.currentTimeMillis()
 
-                if (((currentTimes - beforeTimes) <= 1100) && beforeCardNumber.equals(data)){
+                if (((currentTimes - beforeTimes) <= 2000) && beforeCardNumber.equals(data)){
                     //return@launch
                     return
                 }
@@ -372,11 +378,25 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                 }else{
                     beforeTimes = currentTimes
                 }
-                beforeCardNumber = data
+
+                var cardNumber = data
+                val qrCount = data.windowed(2).count { it == "QR" }
+                if (qrCount > 1) {
+                    cardNumber = splitAndPrefixQR(data)
+                    Log.d(
+                        TAG,
+                        "limesplitByQR  splitAndPrefixQR result == >   ${splitAndPrefixQR(data)}"
+                    )
+                }
+                Log.d(TAG, "limeAmountScanCode   cardNumber == >  " + cardNumber)
+                if (cardNumber.contains("QR" ) && !cardNumber.startsWith("QR")){
+                    return
+                }
+                beforeCardNumber = cardNumber
                 EventBus.getDefault().post(
                     MessageEventBean(
                         MessageEventType.AmountScanCode,
-                        data
+                        cardNumber
                     )
                 )
             }
@@ -393,6 +413,26 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
 //            scanCount
 //        ) + "：" + data).toString() + "\n"
 //        mWorkHandler!!.sendMessage(message)
+    }
+
+
+
+    fun splitAndPrefixQR(input: String): String {
+        // 如果输入为空或不包含 QR 直接返回 ""
+        if (input.isEmpty() || !input.contains("QR")) {
+            return ""
+        }
+
+        // 使用 "QR" 分割字符串，并过滤掉可能产生的空白字符串
+        val parts = input.split("QR").filter { it.isNotEmpty() }
+
+        // 对于每个部分，检查其长度并决定是否添加前缀 "QR"
+        parts.map { part ->
+            if (part.length > 18){
+                return  "QR$part"
+            }
+        }
+        return "";
     }
 
     override fun onInitScan(isSuccess: Boolean) {
@@ -1591,7 +1631,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                             if (event.action == KeyEvent.ACTION_UP) {
                                 timestampList.clear()
                                 mainFragment.amountFragment.cancelAmountPay()
-                                ttsSpeak("支付失败，请输入正确金额，按确认键后，再进行扫码")
+                                ttsSpeak("用户扫码无效")
                             }
                             return true
                         } else {

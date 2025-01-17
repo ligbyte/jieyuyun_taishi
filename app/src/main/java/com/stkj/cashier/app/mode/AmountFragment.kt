@@ -627,7 +627,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
             var md5 = EncryptUtils.encryptMD5ToString16(card + "&" + App.serialNumber)
             map["sign"] = md5
             Log.d(TAG, "limecardparams 502: " + GsonUtils.toJson(map))
-            if (binding.tvStatus.text.toString().trim().equals("查询成功")){
+            if (showPayStatus()){
                 return
             }
             tvAmountTextBefore = binding.tvAmount.text.toString().trim()
@@ -1906,8 +1906,8 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
 
     fun isPaying():Boolean{
 
-        if (showPayStatus()){
-            return true
+        if (showPayStatusNoPaying()){
+            return false
         }
 
         if (getTvStatus().equals("输入中" ) && !isCurrentFixAmountMode){
@@ -1926,10 +1926,16 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
     }
 
 
+    fun showPayStatusNoPaying():Boolean{
+        return getTvStatus().equals("支付失败") || getTvStatus().equals("支付成功") ||  getTvStatus().equals("余额不足") || getTvStatus().equals("查询成功")
+    }
+
 
     fun isRefund():Boolean{
         return binding.tvTitle.text.toString().contains("以确认可退款订单")
     }
+
+
 
     fun isCurrentFixAmountMode():Boolean{
         return isCurrentFixAmountMode
