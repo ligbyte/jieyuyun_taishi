@@ -81,6 +81,8 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
     private var layoutManager: LinearLayoutManager? = null
     private var mIsRefund = false
     private var mPayErrorRetry: Disposable? = null
+    private var tvAmountTextBefore = ""
+    private var tvStatustextBefore = ""
 
 
 
@@ -345,14 +347,28 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
                                 // 这里的代码会在3秒后执行一次
 
                                 mIsPaying = false
-
                                 binding.tvFixAmountModeStatus.text = "定额模式"
                                 binding.tvFixAmountModeStatus.setBackgroundResource(R.drawable.bg_select_checkbox_selected)
                                 binding.tvFixAmountModeStatus.setTextColor(Color.parseColor("#00DC82"))
-                                binding.tvStatus.text = "-"
                                 scanCodeCallback?.stopScan()
                                 binding.tvStatus.setTextColor(Color.parseColor("#ffffff"))
-                                binding.tvAmount.text = ""
+//                                binding.tvAmount.text = ""
+//                                binding.tvStatus.text = "-"
+
+                                binding.tvAmount.text = tvAmountTextBefore
+                                binding.tvStatus.text = tvStatustextBefore
+
+//                                if (TextUtils.isEmpty(tvAmountTextBefore)){
+//                                    binding.tvAmount.text = ""
+//                                }else{
+//                                    binding.tvAmount.text = tvAmountTextBefore
+//                                }
+//
+//                                if (TextUtils.isEmpty(tvStatustextBefore)){
+//                                    binding.tvStatus.text = ""
+//                                }else{
+//                                    binding.tvStatus.text = tvStatustextBefore
+//                                }
 
                             }
                         ) { throwable: Throwable? ->
@@ -361,6 +377,8 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
                         }
                 } else if (it.code == 10009) {
                     ttsSpeak("查询中")
+                }else if (it.code == 10024) {
+                    it.message?.let { it1 -> ttsSpeak(it1) }
                 } else {
                     ttsSpeak("查询失败")
                 }
@@ -608,6 +626,8 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
             var md5 = EncryptUtils.encryptMD5ToString16(card + "&" + App.serialNumber)
             map["sign"] = md5
             Log.d(TAG, "limecardparams 502: " + GsonUtils.toJson(map))
+            tvAmountTextBefore = binding.tvAmount.text.toString().trim()
+            tvStatustextBefore = binding.tvStatus.text.toString().trim()
             viewModel.queryBalance(map)
 
         }  else {
@@ -840,7 +860,8 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
                                 .post(MessageEventBean(MessageEventType.AmountNotice2))
                             return
                         }
-                        if (TextUtils.isEmpty(scanningCode) || !TextUtils.equals(scanningCode,it)) {
+                        //if (TextUtils.isEmpty(scanningCode) || !TextUtils.equals(scanningCode,it)) {
+                        if (!TextUtils.isEmpty(it)) {
                             refreshPayingStatus()
                             modifyBalanceByScanCode(it)
                         }
@@ -1262,11 +1283,8 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
 //                            mainActivity.finishAll()
 //                            //
 //                            Process.killProcess(Process.myPid())
-                            sendLocalBroadcast("android.intent.action.systemui","status_bar","show");
-                            sendLocalBroadcast("android.intent.action.systemui","navigation bar","show");
-                            sendLocalBroadcast("android.intent.action.systemui","statusbar_drop","on");
-                            sendLocalBroadcast("android.intent.action.systemui","setting_button","on");
-
+                            RkSysTool.getInstance().setStatusBar(true)
+                            RkSysTool.getInstance().setNavitionBar(true)
                             //sendLocalBroadcast("android.intent.action.launcher","application","com.android.launcher3/com.android.launcher3.Launcher");
 
                             // 创建并启动 Intent 到主屏幕
@@ -1881,33 +1899,27 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
     }
 
     fun isPaying():Boolean{
+
+        if (showPayStatus()){
+            return true
+        }
+
         if (getTvStatus().equals("输入中" ) && !isCurrentFixAmountMode){
             return false
         }
+
+
         if(getTvStatus().equals("-") && !isCurrentFixAmountMode){
             return false
         }
         return getTvStatus().equals("支付中") || isCurrentFixAmountMode
     }
 
-    fun isAmountZero():Boolean{
-        val text = binding.tvAmount.text.toString().trim()
-
-        // 检查是否为纯数字（包括正数和负数）
-        if (text.isEmpty()) {
-            return true  // 如果文本为空，返回 true 表示无效
-        }
-
-        // 尝试将字符串转换为 BigDecimal 类型，并检查是否为纯数字
-        return try {
-            val amount = BigDecimal(text)
-            // 判断数值是否大于 0
-            amount.compareTo(BigDecimal.ZERO) > 0
-        } catch (e: NumberFormatException) {
-            // 如果转换失败或不是纯数字，返回 true 表示无效
-            true
-        }
+    fun showPayStatus():Boolean{
+        return getTvStatus().equals("支付失败") || getTvStatus().equals("支付成功") || getTvStatus().equals("支付中") || getTvStatus().equals("余额不足") || getTvStatus().equals("查询成功")
     }
+
+
 
     fun isRefund():Boolean{
         return binding.tvTitle.text.toString().contains("以确认可退款订单")

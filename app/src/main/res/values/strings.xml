@@ -2,9 +2,8 @@
     <string name="app_name">慧餐宝</string>
 
     <!--//设备厂商+产品+设备型号 更新字段-->
-    <string name="deviceType">cashier_telpo_tps580_face</string>
-<!--    <string name="deviceType">cashier_jieyuyun_taishi</string>-->
-
+<!--    <string name="deviceType">cashier_telpo_tps580_face</string>-->
+    <string name="deviceType">cashier_jieyuyun_taishi</string>
     <!-- Error -->
     <string name="result_connect_failed_error">服务器连接失败，请稍后再试。</string>
     <string name="result_connect_timeout_error">服务器连接超时，请稍后再试。</string>

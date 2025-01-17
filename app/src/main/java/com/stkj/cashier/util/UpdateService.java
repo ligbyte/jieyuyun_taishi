@@ -357,9 +357,11 @@ public class UpdateService extends Service {
 
         // 静默安装APK
         Log.d(TAG,"limesuccess 静默安装APK " + 359);
-        path = "/storage/emulated/0/test.apk";
-        RkSysTool.getInstance().installSlientApk(App.applicationContext, path,true);
-//        RkSysTool.silenceInstallApk(App.applicationContext, path, null);
+//        path = "/storage/emulated/0/test.apk";
+//        RkSysTool.getInstance().installSlientApk(App.applicationContext, path,true);
+        RkSysTool.silenceInstallApk(App.applicationContext, path, null);
+        RkSysTool.getInstance().setStatusBar(true);
+        RkSysTool.getInstance().setNavitionBar(true);
 //        InstallUtils.install28(App.applicationContext, path, InstallResultReceiver.class);
 //        new SystemApiUtil(this).installApp(path,"com.stkj.cashier");
 

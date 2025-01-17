@@ -65,6 +65,7 @@ import com.stkj.cashier.scan.scan.ScanTool
 import com.stkj.cashier.util.ByteReverser
 import com.stkj.cashier.util.ParseData
 import com.stkj.cashier.util.QueueManager
+import com.stkj.cashier.util.RkSysTool
 import com.stkj.cashier.util.SerialNumber
 import com.stkj.cashier.util.TimeUtils
 import com.stkj.cashier.util.UpdateService
@@ -225,6 +226,20 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
 
                             if (DifferentDisplay.isStartFaceScan.get() && (mainFragment.amountFragment.isPaying() || mainFragment.amountFragment.isRefund())) {
                                 DifferentDisplay.isStartFaceScan.set(false)
+                                var currentTimes  = System.currentTimeMillis()
+
+                                if (((currentTimes - beforeTimes) <= 1100) && beforeCardNumber.equals(card)){
+                                    //return@launch
+                                    return
+                                }
+
+                                if ((currentTimes - beforeTimes) < 500){
+                                    //return@launch
+                                    return
+                                }else{
+                                    beforeTimes = currentTimes
+                                }
+                                beforeCardNumber = card
                                 EventBus.getDefault().post(
                                     MessageEventBean(
                                         MessageEventType.AmountCard,
@@ -232,8 +247,8 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                                     )
                                 )
                             }else{
-                                Log.d(TAG,"limequeryBalanceByCard mainFragment.amountFragment.isAmountZero(): " + mainFragment.amountFragment.isAmountZero())
-                                if (mainFragment.amountFragment.isAmountZero()) {
+                                Log.d(TAG,"limequeryBalanceByCard mainFragment.amountFragment.isPaying(): " + mainFragment.amountFragment.isPaying())
+                                if (!mainFragment.amountFragment.isRefund() && !mainFragment.amountFragment.isPaying()) {
                                     if ((System.currentTimeMillis() - amountCardQueryTime) < 2000) {
                                         return
                                     }
@@ -343,25 +358,21 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
         Log.e(TAG,"limeparams 247: onScanCallBack ========================================")
 
         if(data?.length!! > 8){
-
-            var currentTimes  = System.currentTimeMillis()
-
-            if (((currentTimes - beforeTimes) <= 1100) && beforeCardNumber.equals(data)){
-                //return@launch
-                return
-            }
-
-            if ((currentTimes - beforeTimes) < 500){
-                //return@launch
-                return
-            }else{
-                beforeTimes = currentTimes
-            }
-
-
-            beforeCardNumber = data
-
             if (mainFragment.amountFragment.isPaying() || mainFragment.amountFragment.isRefund()) {
+                var currentTimes  = System.currentTimeMillis()
+
+                if (((currentTimes - beforeTimes) <= 1100) && beforeCardNumber.equals(data)){
+                    //return@launch
+                    return
+                }
+
+                if ((currentTimes - beforeTimes) < 500){
+                    //return@launch
+                    return
+                }else{
+                    beforeTimes = currentTimes
+                }
+                beforeCardNumber = data
                 EventBus.getDefault().post(
                     MessageEventBean(
                         MessageEventType.AmountScanCode,
@@ -399,9 +410,9 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
         super.initData(savedInstanceState)
         try{
         LogUtils.e("主页initData")
-        //RkSysTool.getInstance().initContext(this)
-        //RkSysTool.getInstance().setStatusBar(false)
-       // RkSysTool.getInstance().setNavitionBar(false)
+        RkSysTool.getInstance().initContext(this)
+        RkSysTool.getInstance().setStatusBar(false)
+        RkSysTool.getInstance().setNavitionBar(false)
 
         SPUtils.getInstance().put(Constants.SWITCH_CONSUMPTION_DIALOG, 0) //不显示消费确认框
         showFragment(HomeMenu.MENU1)
@@ -422,7 +433,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
         getIntervalCardType()
         Handler().postDelayed({
             company()
-            }, 1500)
+            }, 2000)
         viewModel.deviceStatus.observe(this) {
             LogUtils.e("deviceStatus observe")
             var indexs = it.data?.updateUserInfo?.split("&")
@@ -592,8 +603,10 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
             requestConsumptionType()
             //checkCurrentAmountMode()
             // lime modify end
-            EventBus.getDefault()
-                .post(MessageEventBean(MessageEventType.IntervalCardType))
+            Handler().postDelayed({
+                EventBus.getDefault()
+                    .post(MessageEventBean(MessageEventType.IntervalCardType))
+            }, 2000)
         }
         viewModel.checkAppVersion.observe(this) {
             Log.d(TAG,"limecheckAppVersion 596")
@@ -869,6 +882,20 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
 
                               if (DifferentDisplay.isStartFaceScan.get() && (mainFragment.amountFragment.isPaying() || mainFragment.amountFragment.isRefund())) {
                                   DifferentDisplay.isStartFaceScan.set(false)
+                                  var currentTimes  = System.currentTimeMillis()
+
+                                  if (((currentTimes - beforeTimes) <= 1100) && beforeCardNumber.equals(card)){
+                                      //return@launch
+                                      continue
+                                  }
+
+                                  if ((currentTimes - beforeTimes) < 500){
+                                      //return@launch
+                                      continue
+                                  }else{
+                                      beforeTimes = currentTimes
+                                  }
+                                  beforeCardNumber = card
                                   EventBus.getDefault().post(
                                       MessageEventBean(
                                           MessageEventType.AmountCard,
@@ -1500,6 +1527,8 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
 //            LogUtils.e("按键MainActivity back")
 //            return true
 //        }
+
+
             if (event.action == KeyEvent.ACTION_UP) {
                 Log.d(
                     TAG,
@@ -1508,6 +1537,10 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
             }
             //LogUtils.e("按键MainActivity device vendorId: " + event.device.vendorId + " productId: " + event.device.productId)
 
+            if (event.isLongPress) {
+                // 拦截长按事件
+                return true;
+            }
 
             if (event.keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER || event.keyCode == KeyEvent.KEYCODE_F1 || event.keyCode == KeyEvent.KEYCODE_DEL) {
                 if (event.action == KeyEvent.ACTION_UP) {
