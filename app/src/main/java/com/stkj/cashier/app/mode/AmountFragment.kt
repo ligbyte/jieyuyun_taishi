@@ -192,7 +192,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
 
         viewModel.modifyBalance.observe(this) {
             LogUtils.e("modifyBalance observe")
-
+            scanningCode = "";
             if (it.code == 10000) {
 //                FaceUtil.GPIOSet("rgb_led_en", 0);
 
@@ -319,6 +319,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
 
             viewModel.queryBalance.observe(this) {
                 LogUtils.e("modifyBalance observe")
+                scanningCode = ""
                 if (it.code == 10000) {
                     scanCodeCallback?.stopScan()
                     ttsSpeak("查询成功")
@@ -626,8 +627,12 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
             var md5 = EncryptUtils.encryptMD5ToString16(card + "&" + App.serialNumber)
             map["sign"] = md5
             Log.d(TAG, "limecardparams 502: " + GsonUtils.toJson(map))
+            if (binding.tvStatus.text.toString().trim().equals("查询成功")){
+                return
+            }
             tvAmountTextBefore = binding.tvAmount.text.toString().trim()
             tvStatustextBefore = binding.tvStatus.text.toString().trim()
+
             viewModel.queryBalance(map)
 
         }  else {
@@ -860,8 +865,8 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
                                 .post(MessageEventBean(MessageEventType.AmountNotice2))
                             return
                         }
-                        //if (TextUtils.isEmpty(scanningCode) || !TextUtils.equals(scanningCode,it)) {
-                        if (!TextUtils.isEmpty(it)) {
+                        if (TextUtils.isEmpty(scanningCode) || !TextUtils.equals(scanningCode,it)) {
+                        //if (!TextUtils.isEmpty(it)) {
                             refreshPayingStatus()
                             modifyBalanceByScanCode(it)
                         }
@@ -1360,6 +1365,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
 
                 "删除" -> {
                     Log.d(TAG, "limekey 1221: " + "删除")
+                    scanningCode = ""
                     if (mIsRefund) {
                         Log.d(TAG, "limeRefund ========> 1225")
                         hideRefundList()

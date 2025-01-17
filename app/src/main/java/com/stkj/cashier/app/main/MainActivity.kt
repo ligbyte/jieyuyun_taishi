@@ -431,9 +431,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
 
         initCheckStatus()
         getIntervalCardType()
-        Handler().postDelayed({
             company()
-            }, 2000)
         viewModel.deviceStatus.observe(this) {
             LogUtils.e("deviceStatus observe")
             var indexs = it.data?.updateUserInfo?.split("&")
@@ -478,13 +476,17 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
             //{"Code":10000,"company":"测试服","Data":{"deviceName":"键盘设备"},"Message":"成功"}
 
 //            binding.tvCompanyName.text = it.company
-            EventBus.getDefault().post(
-                MessageEventBean(
-                    MessageEventType.CompanyName,
-                    it.company,
-                    it.data?.deviceName
+
+
+            Handler().postDelayed({
+                EventBus.getDefault().post(
+                    MessageEventBean(
+                        MessageEventType.CompanyName,
+                        it.company,
+                        it.data?.deviceName
+                    )
                 )
-            )
+            }, 3000)
         }
         viewModel.companyMember.observe(this) { items ->
             LogUtils.e("lime== 人脸录入后台返回的人数" + (items.data?.results?.size))
