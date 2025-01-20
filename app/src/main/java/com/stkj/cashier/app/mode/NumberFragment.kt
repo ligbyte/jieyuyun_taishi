@@ -255,8 +255,19 @@ class NumberFragment : BaseFragment<ModeViewModel, NumberFragmentBinding>() {
                     var map = hashMapOf<String, Any>()
                     map["mode"] = "PayStatus"
                     map["payNo"] = card
+                    //payType   打开传1 关闭传0
+                    if (SPUtils.getInstance().getBoolean(Constants.SWITCH_TONG_LIAN_PAY)){
+                        map["payType"] = 1
+                    }else{
+                        map["payType"] = 0
+                    }
+                    val payType = if (SPUtils.getInstance().getBoolean(Constants.SWITCH_TONG_LIAN_PAY)){
+                        1
+                    }else{
+                        0
+                    }
                     var md5 =
-                        EncryptUtils.encryptMD5ToString16(card)
+                        EncryptUtils.encryptMD5ToString16(card + "&" + payType)
                     map["sign"] = md5
                     viewModel.payStatus(map)
                 }
