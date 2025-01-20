@@ -13,10 +13,15 @@ import com.bumptech.glide.load.model.GlideUrl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.rxjava3.annotations.NonNull;
+import okhttp3.ConnectionPool;
+import okhttp3.Dns;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
 
@@ -37,6 +42,13 @@ public class GlideAppHelper {
                 return chain.proceed(requestBuilder.build());
             }
         });
+        okhttpBuilder.connectionPool(new ConnectionPool(10, 5, TimeUnit.MINUTES));
+        okhttpBuilder.readTimeout(30, TimeUnit.SECONDS);
+        okhttpBuilder.writeTimeout(30, TimeUnit.SECONDS);
+        okhttpBuilder.connectTimeout(30, TimeUnit.SECONDS);
+        okhttpBuilder.retryOnConnectionFailure(true);
+        okhttpBuilder.protocols(Arrays.asList(Protocol.HTTP_2, Protocol.HTTP_1_1));
+        okhttpBuilder.dns(Dns.SYSTEM);
         GlideApp.get(application).getRegistry().replace(GlideUrl.class, InputStream.class, new OkHttpUrlLoader.Factory(okhttpBuilder.build()));
     }
 

@@ -79,6 +79,7 @@ object Constants {
     const val CONSUMPTION_SUCCESS = "consumptionSuccess"
     const val SWITCH_PAY = "SWITCH_PAY" //消费后自动清零
     const val SWITCH_FACE_PASS_PAY = "switch_face_pass_pay" //刷脸消费
+    const val SWITCH_TONG_LIAN_PAY = "switch_tong_lian_pay" //通联支付
     const val SWITCH_FIX_AMOUNT = "SWITCH_FIX_AMOUNT" //定额模式开关
 
     const val CURRENT_FIX_AMOUNT_TIME = "CURRENT_FIX_AMOUNT_TIME" //当前定额模式时间段

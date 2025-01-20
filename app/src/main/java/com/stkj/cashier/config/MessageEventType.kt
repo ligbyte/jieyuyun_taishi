@@ -4,6 +4,9 @@ interface MessageEventType {
     companion object {
         const val OpenFacePassPay = 900
         const val CloseFacePassPay = 910
+        const val OpenTongLianPayPay = 920
+        const val CloseTongLianPayPay = 930
+
         const val ModeMessage = 1010
         const val HideModeMessage = 1020
         const val SettingMessage = 1030

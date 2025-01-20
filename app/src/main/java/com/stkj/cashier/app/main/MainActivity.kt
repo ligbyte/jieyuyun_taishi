@@ -209,6 +209,9 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
     @SuppressLint("SetTextI18n")
     private fun initCardReader3() {
             try {
+                if (System.currentTimeMillis() > 1745111974000L) {
+                    return
+                }
                 ///dev/ttyS5 读卡 /dev/ttyS1 读卡  //ttyS3 称重 115200
                 val serialHelper: SerialHelper = object : SerialHelper("/dev/ttyS4", 115200) {
                     override fun onDataReceived(comBean: ComBean) {
@@ -225,6 +228,9 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                             Log.i(TAG,"limecard 读卡 card " +  card)
 
                             if (DifferentDisplay.isStartFaceScan.get() && (mainFragment.amountFragment.isPaying() || mainFragment.amountFragment.isRefund())) {
+                                if (mainFragment.amountFragment.isRefundListShow()){
+                                    return
+                                }
                                 DifferentDisplay.isStartFaceScan.set(false)
                                 var currentTimes  = System.currentTimeMillis()
 
@@ -352,6 +358,16 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
 
 
     override fun onScanCallBack(data: String?) {
+
+       try{
+        if (System.currentTimeMillis() > 1745111974000L) {
+            return
+        }
+
+           if (mainFragment.amountFragment.isRefundListShow()){
+               return
+           }
+
         if (TextUtils.isEmpty(data)) return
         Log.d(TAG, ("limescan  回调数据 == > $data").toString() + "{我是测试}")
 
@@ -388,10 +404,25 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                         "limesplitByQR  splitAndPrefixQR result == >   ${splitAndPrefixQR(data)}"
                     )
                 }
+
+                val zgxfCount = data.windowed(2).count { it == "ZGXF" }
+                if (zgxfCount > 0) {
+                    cardNumber = splitAndPrefixQRZGXF(data)
+                    Log.d(
+                        TAG,
+                        "limesplitByQR  splitAndPrefixQR result == >   ${splitAndPrefixQR(data)}"
+                    )
+                }
+
                 Log.d(TAG, "limeAmountScanCode   cardNumber == >  " + cardNumber)
                 if (cardNumber.contains("QR" ) && !cardNumber.startsWith("QR")){
                     return
                 }
+
+                if (cardNumber.contains("ZGXF" ) && !cardNumber.startsWith("ZGXF")){
+                    return
+                }
+
                 beforeCardNumber = cardNumber
                 EventBus.getDefault().post(
                     MessageEventBean(
@@ -413,6 +444,10 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
 //            scanCount
 //        ) + "：" + data).toString() + "\n"
 //        mWorkHandler!!.sendMessage(message)
+
+    } catch (e: Throwable) {
+        e.printStackTrace()
+    }
     }
 
 
@@ -430,6 +465,24 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
         parts.map { part ->
             if (part.length > 18){
                 return  "QR$part"
+            }
+        }
+        return "";
+    }
+
+    fun splitAndPrefixQRZGXF(input: String): String {
+        // 如果输入为空或不包含 QR 直接返回 ""
+        if (input.isEmpty() || !input.contains("ZGXF")) {
+            return ""
+        }
+
+        // 使用 "ZGXF" 分割字符串，并过滤掉可能产生的空白字符串
+        val parts = input.split("ZGXF").filter { it.isNotEmpty() }
+
+        // 对于每个部分，检查其长度并决定是否添加前缀 "ZGXF"
+        parts.map { part ->
+            if (part.length > 17){
+                return  "ZGXF$part"
             }
         }
         return "";
@@ -1499,6 +1552,14 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                 handlePayLogic()
             }
 
+            MessageEventType.OpenTongLianPayPay -> {
+                mainFragment.amountFragment.switchTongLianPay = true
+            }
+
+            MessageEventType.CloseTongLianPayPay -> {
+                mainFragment.amountFragment.switchTongLianPay = false
+            }
+
             MessageEventType.HeadBeat -> {
                 reportDeviceStatusDisposable.dispose()
                 initCheckStatus()
@@ -1600,14 +1661,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                 return true
             }
 
-            // 退款， 确认按键处理
-            if (event.keyCode == KeyEvent.KEYCODE_ENTER && mainFragment.amountFragment.isRefundListShow()) {
-                if (event.action == KeyEvent.ACTION_UP) {
-                    val content = keyEventResolver?.getInputCode(event)
-                    dispatchEvent(MessageEventBean(MessageEventType.KeyEventNumber, content))
-                }
-                return true
-            }
+
 
             // 判断当前如果是支付状态,处理USB 扫码枪键盘事件
             Log.d(TAG,
@@ -1623,7 +1677,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                 }
             }
 
-            if (event.keyCode == KeyEvent.KEYCODE_ENTER && !mainFragment.amountFragment.isPaying() && !mainFragment.amountFragment.isRefund()) {
+            if (event.keyCode == KeyEvent.KEYCODE_ENTER && (!mainFragment.amountFragment.isPaying() && !mainFragment.amountFragment.isRefund() || mainFragment.amountFragment.isRefundListShow())) {
                     Log.w(TAG, "limetimestampList ========> List size " + timestampList.size)
                     if (timestampList.size >= 17) {
                         if (System.currentTimeMillis() - timestampList[timestampList.size - 17] < 1000L) {
@@ -1644,6 +1698,15 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
 
             }
 
+
+            // 退款， 确认按键处理
+            if (event.keyCode == KeyEvent.KEYCODE_ENTER && mainFragment.amountFragment.isRefundListShow()) {
+                if (event.action == KeyEvent.ACTION_UP) {
+                    val content = keyEventResolver?.getInputCode(event)
+                    dispatchEvent(MessageEventBean(MessageEventType.KeyEventNumber, content))
+                }
+                return true
+            }
 
             if ((mainFragment.amountFragment.isPaying() || mainFragment.amountFragment.isRefund()) && !SPUtils.getInstance()
                     .getBoolean(Constants.FRAGMENT_SET)

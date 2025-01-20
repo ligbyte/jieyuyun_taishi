@@ -83,6 +83,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
     private var mPayErrorRetry: Disposable? = null
     private var tvAmountTextBefore = ""
     private var tvStatustextBefore = ""
+    public var switchTongLianPay = false;
 
 
 
@@ -109,6 +110,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
     override fun initData(savedInstanceState: Bundle?) {
         super.initData(savedInstanceState)
         try{
+            switchTongLianPay = SPUtils.getInstance().getBoolean(Constants.SWITCH_TONG_LIAN_PAY)
         EventBus.getDefault().post(MessageEventBean(MessageEventType.AmountNotice2))
         LogUtils.e("MessageEventType.AmountNotice2 initData")
         layoutManager = LinearLayoutManager(requireActivity());//添加布局管理器
@@ -542,6 +544,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
             map["machine_Number"] = App.serialNumber
             map["money"] = getRealPayMoney()
 //            map["online_Order_number"] = "202012211032"
+
             var md5 =
                 EncryptUtils.encryptMD5ToString16(
                     companyMember.cardNumber + "&60&" + App.serialNumber + "&" + getRealPayMoney()
@@ -575,7 +578,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
             map["online_Order_number"] = onlineOrderNumber
             map["machine_Number"] = App.serialNumber
             map["money"] = getRealPayMoney()
-//            map["online_Order_number"] = "202012211032"
+
             var md5 =
                 EncryptUtils.encryptMD5ToString16(
                     companyMember.cardNumber + "&60&" + App.serialNumber + "&" + getRealPayMoney()
@@ -600,6 +603,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
             map["online_Order_number"] = onlineOrderNumber
             map["machine_Number"] = App.serialNumber
             map["money"] = getRealPayMoney()
+
 //            map["online_Order_number"] = "202012211032"
             var md5 =
                 EncryptUtils.encryptMD5ToString16(
@@ -666,10 +670,23 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
                 card + "&60&" + App.serialNumber + "&" + getRealPayMoney()
                     .trim() + "&" + onlineOrderNumber
             )
+
+            Log.d(TAG, "limeswitchTongLianPay modifyBalanceByScanCode: " + switchTongLianPay)
+            //payType   打开传1 关闭传0
+            if (switchTongLianPay){
+                map["payType"] = 1
+            }else{
+                map["payType"] = 0
+            }
+            val payType = if (switchTongLianPay){
+                1
+            }else{
+                0
+            }
             var md5 =
                 EncryptUtils.encryptMD5ToString16(
                     card + "&60&" + App.serialNumber + "&" + getRealPayMoney()
-                        .trim() + "&" + onlineOrderNumber
+                        .trim() + "&" + onlineOrderNumber + "&" + payType
                 )
             map["sign"] = md5
             Log.e(TAG,"limeparams 566: " + GsonUtils.toJson(map))

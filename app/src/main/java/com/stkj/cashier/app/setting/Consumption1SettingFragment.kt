@@ -58,7 +58,7 @@ class Consumption1SettingFragment :
     private var mPageIndex = 0
 
     //第一层页面总item数量
-    private val firstPageSelectItemCount = 5
+    private val firstPageSelectItemCount = 6
 
     //第二层页面总item数量
     private val secondPageSelectItemCount = 8
@@ -136,6 +136,7 @@ class Consumption1SettingFragment :
     override fun initData(savedInstanceState: Bundle?) {
         super.initData(savedInstanceState)
      try{
+
         showFirstPage()
     } catch (e: Throwable) {
         e.printStackTrace()
@@ -259,17 +260,19 @@ class Consumption1SettingFragment :
                 Log.e("selectScrollItem", "-scrollNextItem--resetIndex- = $currentSelectIndex")
             }
         }
-        Log.e("selectScrollItem", "-scrollNextItem-currentSelectIndex-- = $currentSelectIndex")
+        Log.d("selectScrollItem", "limecurrentSelectIndex = $currentSelectIndex")
         selectScrollItem(currentSelectIndex)
     }
 
     private fun selectScrollItem(itemIndex: Int) {
+
         if (mPageIndex == 0) {
             binding.flFixAmountMode.background = null
             binding.flSwitchFacePass.background = null
             binding.flRestartApp.background = null
             binding.flShutdownDevice.background = null
             binding.flRebootDevice.background = null
+            binding.flSwitchTongLianPay.background = null
             var focusView: View? = null
             when (itemIndex) {
                 0 -> {
@@ -283,16 +286,21 @@ class Consumption1SettingFragment :
                 }
 
                 2 -> {
+                    binding.flSwitchTongLianPay.background = ColorDrawable(0x12ffffff)
+                    focusView = binding.flSwitchTongLianPay
+                }
+
+                3 -> {
                     binding.flRestartApp.background = ColorDrawable(0x12ffffff)
                     focusView = binding.flRestartApp
                 }
 
-                3 -> {
+                4 -> {
                     binding.flShutdownDevice.background = ColorDrawable(0x12ffffff)
                     focusView = binding.flShutdownDevice
                 }
 
-                4 -> {
+                5 -> {
                     binding.flRebootDevice.background = ColorDrawable(0x12ffffff)
                     focusView = binding.flRebootDevice
                 }
@@ -470,13 +478,27 @@ class Consumption1SettingFragment :
 //                                                .post(MessageEventBean(MessageEventType.CloseFacePassPay))
 //                                        }
 //                                        ttsSpeak("人脸识别正在开发中，敬请期待")
-                                    } else if (currentSelectIndex == 0) {
-                                        showSecondPage()
                                     } else if (currentSelectIndex == 2) {
+                                        val switchTongLianPay = binding.ivSwitchTongLianPay.isSelected
+                                        binding.ivSwitchTongLianPay.isSelected = !switchTongLianPay
+                                        if (binding.ivSwitchTongLianPay.isSelected) {
+                                            SPUtils.getInstance()
+                                                .put(Constants.SWITCH_TONG_LIAN_PAY, true)
+                                            EventBus.getDefault()
+                                                .post(MessageEventBean(MessageEventType.OpenTongLianPayPay))
+                                        } else {
+                                            SPUtils.getInstance()
+                                                .put(Constants.SWITCH_TONG_LIAN_PAY, false)
+                                            EventBus.getDefault()
+                                                .post(MessageEventBean(MessageEventType.CloseTongLianPayPay))
+                                        }
+                                    }else if (currentSelectIndex == 0) {
+                                        showSecondPage()
+                                    } else if (currentSelectIndex == 3) {
                                         ProcessPhoenix.triggerRebirth(App.applicationContext)
-                                    } else if (currentSelectIndex == 3){
-                                        ShellUtils.execCommand("reboot -p",false)
                                     } else if (currentSelectIndex == 4){
+                                        ShellUtils.execCommand("reboot -p",false)
+                                    } else if (currentSelectIndex == 5){
                                         ShellUtils.execCommand("reboot",false)
                                     } else {
 
@@ -706,9 +728,8 @@ class Consumption1SettingFragment :
 
     private fun refreshFirstPageData() {
         binding.tvDeviceSerialNumber.text = App.serialNumber + "/" + BuildConfig.VERSION_NAME
-        val facePassPaySwitch =
-            SPUtils.getInstance().getBoolean(Constants.SWITCH_FACE_PASS_PAY, false)
-        binding.ivSwitchFacePass.isSelected = facePassPaySwitch
+        binding.ivSwitchFacePass.isSelected =  SPUtils.getInstance().getBoolean(Constants.SWITCH_FACE_PASS_PAY, false)
+        binding.ivSwitchTongLianPay.isSelected = SPUtils.getInstance().getBoolean(Constants.SWITCH_TONG_LIAN_PAY)
     }
 
     private fun showSecondPage() {

@@ -92,6 +92,36 @@
                         </FrameLayout>
 
                         <FrameLayout
+                            android:id="@+id/fl_switch_tong_lian_pay"
+                            android:layout_width="match_parent"
+                            android:visibility="visible"
+                            android:layout_height="200dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_marginLeft="25dp"
+                                android:gravity="center_vertical"
+                                android:text="通联支付"
+                                android:textColor="@color/white"
+                                android:textSize="40sp" />
+
+                            <ImageView
+                                android:id="@+id/iv_switch_tong_lian_pay"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_gravity="center_vertical|right"
+                                android:layout_marginRight="25dp"
+                                android:src="@drawable/selector_bg_switch_button" />
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="2dp"
+                                android:layout_gravity="bottom"
+                                android:background="#17d8d8d8" />
+                        </FrameLayout>
+
+                        <FrameLayout
                             android:id="@+id/fl_restart_app"
                             android:layout_width="match_parent"
                             android:layout_height="200dp">

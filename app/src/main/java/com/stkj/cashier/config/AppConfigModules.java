@@ -13,9 +13,17 @@ import com.stkj.cashier.App;
 import com.stkj.cashier.constants.Constants
 ;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.ConnectionPool;
+import okhttp3.Dns;
 import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
 import okhttp3.logging.HttpLoggingInterceptor;
-import retrofit2.Retrofit;
 
 /**
  * @description $
@@ -32,10 +40,16 @@ public class AppConfigModules extends FrameConfigModule {
                         @Override
                         public void applyOptions(OkHttpClient.Builder builder) {
                             //TODO 配置OkHttpClient
-
                             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
                             logging.setLevel(HttpLoggingInterceptor.Level.BODY);
                             builder.addInterceptor(logging);
+                            builder.connectionPool(new ConnectionPool(10, 5, TimeUnit.MINUTES));
+                            builder.readTimeout(30, TimeUnit.SECONDS);
+                            builder.writeTimeout(30, TimeUnit.SECONDS);
+                            builder.connectTimeout(30, TimeUnit.SECONDS);
+                            builder.retryOnConnectionFailure(true);
+                            builder.protocols(Arrays.asList(Protocol.HTTP_2, Protocol.HTTP_1_1));
+                            builder.dns(Dns.SYSTEM);
                         }
                     });
 
@@ -57,6 +71,13 @@ public class AppConfigModules extends FrameConfigModule {
                                     LogUtils.d3("HTTP  " + message);
                                 }
                             }).setLevel(HttpLoggingInterceptor.Level.BODY)));
+                            builder.connectionPool(new ConnectionPool(10, 5, TimeUnit.MINUTES));
+                            builder.readTimeout(30, TimeUnit.SECONDS);
+                            builder.writeTimeout(30, TimeUnit.SECONDS);
+                            builder.connectTimeout(30, TimeUnit.SECONDS);
+                            builder.retryOnConnectionFailure(true);
+                            builder.protocols(Arrays.asList(Protocol.HTTP_2, Protocol.HTTP_1_1));
+                            builder.dns(Dns.SYSTEM);
                         }
                     });
         }
