@@ -23,7 +23,6 @@ import android.text.TextUtils
 import android.util.Log
 import android.util.SparseArray
 import android.view.Display
-import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
@@ -36,6 +35,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.util.valueIterator
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
+import cn.hutool.core.util.ReUtil
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.FutureTarget
 import com.king.base.util.SystemUtils
@@ -184,7 +184,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
             }
 
             override fun refund() {
-                initMemberThread()
+                //initMemberThread()
             }
 
         }
@@ -209,7 +209,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
     @SuppressLint("SetTextI18n")
     private fun initCardReader3() {
             try {
-                if (System.currentTimeMillis() > 1745111974000L) {
+                if (System.currentTimeMillis() > 1747788635000L) {
                     return
                 }
                 ///dev/ttyS5 读卡 /dev/ttyS1 读卡  //ttyS3 称重 115200
@@ -246,6 +246,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                                     beforeTimes = currentTimes
                                 }
                                 beforeCardNumber = card
+                                mainFragment.amountFragment.isScanCode = true
                                 EventBus.getDefault().post(
                                     MessageEventBean(
                                         MessageEventType.AmountCard,
@@ -259,6 +260,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                                         return
                                     }
                                     amountCardQueryTime = System.currentTimeMillis()
+                                    mainFragment.amountFragment.isScanCode = true
                                     EventBus.getDefault().post(
                                         MessageEventBean(
                                             MessageEventType.AmountCardQuery,
@@ -360,7 +362,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
     override fun onScanCallBack(data: String?) {
 
        try{
-        if (System.currentTimeMillis() > 1745111974000L) {
+        if (System.currentTimeMillis() > 1747788635000L) {
             return
         }
 
@@ -415,6 +417,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                 }
 
                 Log.d(TAG, "limeAmountScanCode   cardNumber == >  " + cardNumber)
+
                 if (cardNumber.contains("QR" ) && !cardNumber.startsWith("QR")){
                     return
                 }
@@ -423,13 +426,26 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                     return
                 }
 
-                beforeCardNumber = cardNumber
-                EventBus.getDefault().post(
-                    MessageEventBean(
-                        MessageEventType.AmountScanCode,
-                        cardNumber
+                if (cardNumber.length > 24){
+                    return
+                }
+
+                val isZfb: Boolean = ReUtil.isMatch("^(25|26|27|28|29|30)\\d{14,22}$", cardNumber)
+                val isWx: Boolean = ReUtil.isMatch("^(10|11|12|13|14|15)\\d{16}$", cardNumber)
+                val isYsf: Boolean = ReUtil.isMatch("^62\\d{14,17}$", cardNumber)
+
+                if (cardNumber.startsWith("QR") || cardNumber.startsWith("ZGXF") || isZfb || isWx || isYsf){
+                    beforeCardNumber = cardNumber
+                    mainFragment.amountFragment.isScanCode = true
+                    EventBus.getDefault().post(
+                        MessageEventBean(
+                            MessageEventType.AmountScanCode,
+                            cardNumber
+                        )
                     )
-                )
+                }
+
+
             }
         }
 
@@ -570,7 +586,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
 
 //            binding.tvCompanyName.text = it.company
 
-
+            Log.e(TAG,"limecompany it.company" + it.company)
             Handler().postDelayed({
                 EventBus.getDefault().post(
                     MessageEventBean(
@@ -1639,11 +1655,6 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                 )
             }
             //LogUtils.e("按键MainActivity device vendorId: " + event.device.vendorId + " productId: " + event.device.productId)
-
-            if (event.isLongPress) {
-                // 拦截长按事件
-                return true;
-            }
 
             if (event.keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER || event.keyCode == KeyEvent.KEYCODE_F1 || event.keyCode == KeyEvent.KEYCODE_DEL) {
                 if (event.action == KeyEvent.ACTION_UP) {

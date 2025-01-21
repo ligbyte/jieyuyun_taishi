@@ -80,10 +80,12 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
     private var mAdapter: ConsumeRefundListAdapter? = null
     private var layoutManager: LinearLayoutManager? = null
     private var mIsRefund = false
+    private var beforeCrd = ""
     private var mPayErrorRetry: Disposable? = null
     private var tvAmountTextBefore = ""
     private var tvStatustextBefore = ""
     public var switchTongLianPay = false;
+    public var isScanCode = false;
 
 
 
@@ -121,6 +123,9 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
         viewModel.consumeRefundList.observe(this) {
             LogUtils.d("consumeRecord observe")
             if (mIsRefund) {
+                if (!isScanCode){
+                    return@observe
+                }
                 if (it.code == 10000) {
                     val refundListBean = it.data
                     if (refundListBean != null && !refundListBean.results.isNullOrEmpty()) {
@@ -389,7 +394,10 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
             }
 
         viewModel.consumeRefundResult.observe(this) {
-            LogUtils.d("consumeRefundResult observe")
+            try{
+
+                LogUtils.d("consumeRefundResult observe")
+
             if (it.code == 10000) {
                 if (!it.message.isNullOrEmpty()) {
                     ttsSpeak(it.message!!)
@@ -465,6 +473,9 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
                 }
             }
 
+        } catch (e: Throwable) {
+                Log.e(TAG, "limeAmountScanCode   consumeRefundResult == >  " + e.message)
+            }
         }
 
         //金额文字监听
@@ -700,7 +711,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
     }
 
     private fun getPayStatus(payNo: String) {
-        Observable.timer(1, TimeUnit.SECONDS)
+        Observable.timer(2, TimeUnit.SECONDS)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { aLong ->
@@ -754,6 +765,17 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
      * */
     private fun searchConsumeRefundList(card: String) {
         LogUtils.e("查询退款订单列表 卡号: " + card)
+
+        if (TextUtils.isEmpty(beforeCrd)){
+            beforeCrd = card
+        }
+
+        if (!card.equals(beforeCrd)){
+            beforeCrd = card
+            mAdapter?.data?.clear()
+            mAdapter?.notifyDataSetChanged()
+        }
+
         var map = hashMapOf<String, Any>()
         map["mode"] = "RefundOrderList"
         map["machine_Number"] = App.serialNumber
@@ -1405,6 +1427,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
                 "删除" -> {
                     Log.d(TAG, "limekey 1221: " + "删除")
                     scanningCode = ""
+                    isScanCode = false
                     if (mIsRefund) {
                         Log.d(TAG, "limeRefund ========> 1225")
                         hideRefundList()
@@ -1462,6 +1485,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
 
                 "功能" -> {
                     LogUtils.e("功能" + DifferentDisplay.isStartFaceScan + "/" + mIsRefund)
+                    Log.d(TAG, "limeAmountScanCode   1467 == >  " )
                     if (NetworkUtils.isConnected()) {
                         if (isCurrentFixAmountMode) {
                             //退款中
@@ -1472,12 +1496,14 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
                             if (mIsPaying) {
                                 cancelAmountPay()
                             }
+                            Log.d(TAG, "limeAmountScanCode   1499 mIsRefund  "  + mIsRefund + "  mIsPaying: " + mIsPaying)
                             showRefundList()
                             scanCodeCallback?.refund()
                         } else {
+                            Log.d(TAG, "limeAmountScanCode   1503 mIsRefund  "  + mIsRefund + "  mIsPaying: " + mIsPaying)
                             if (!mIsRefund && !mIsPaying) {
-                                showRefundList()
-                                scanCodeCallback?.refund()
+                                    showRefundList()
+                                    scanCodeCallback?.refund()
                             } else {
                                 ttsSpeak("请先点清除键，再点功能键")
                             }
