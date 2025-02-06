@@ -433,8 +433,9 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                 val isZfb: Boolean = ReUtil.isMatch("^(25|26|27|28|29|30)\\d{14,22}$", cardNumber)
                 val isWx: Boolean = ReUtil.isMatch("^(10|11|12|13|14|15)\\d{16}$", cardNumber)
                 val isYsf: Boolean = ReUtil.isMatch("^62\\d{14,17}$", cardNumber)
+                val isTongLianRefund = ReUtil.isMatch("^250\\d{15}$", cardNumber)
 
-                if (cardNumber.startsWith("QR") || cardNumber.startsWith("ZGXF") || isZfb || isWx || isYsf){
+                if (cardNumber.startsWith("QR") || cardNumber.startsWith("ZGXF") || isZfb || isWx || isYsf || isTongLianRefund){
                     beforeCardNumber = cardNumber
                     mainFragment.amountFragment.isScanCode = true
                     EventBus.getDefault().post(
