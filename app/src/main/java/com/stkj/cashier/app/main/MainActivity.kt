@@ -1978,18 +1978,29 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
 
     override fun onCreateFacePreviewView(previewView: SurfaceView?, irPreview: SurfaceView?) {
         Log.d(TAG, "limeFaceCamera onCreateFacePreviewView == > : " + 1807)
-        var cbgCameraHelper: CBGCameraHelper? = getWeakRefHolder(CBGCameraHelper::class.java)
-        var isFaceDualCamera = DeviceManager.getInstance().isSupportDualCamera() &&
-                CBGFacePassConfigMMKV.isOpenDualCamera()
-        cbgCameraHelper?.setPreviewView(previewView, irPreview, isFaceDualCamera)
-        //异步初始化相机模块
-        Schedulers.io().scheduleDirect {
-            try {
-                cbgCameraHelper?.prepareFacePassDetect()
-            } catch (e: Throwable) {
-                e.printStackTrace()
+
+
+        mWorkHandler?.postDelayed({
+
+            //异步初始化相机模块
+            Schedulers.io().scheduleDirect {
+                try {
+
+//                    var cbgCameraHelper: CBGCameraHelper? = getWeakRefHolder(CBGCameraHelper::class.java)
+//                    var isFaceDualCamera = DeviceManager.getInstance().isSupportDualCamera() &&
+//                            CBGFacePassConfigMMKV.isOpenDualCamera()
+//                    cbgCameraHelper?.setPreviewView(previewView, irPreview, isFaceDualCamera)
+//                    cbgCameraHelper?.prepareFacePassDetect()
+
+                } catch (e: Throwable) {
+                    e.printStackTrace()
+                }
             }
-        }
+
+
+        },2000)
+
+
     }
 
 

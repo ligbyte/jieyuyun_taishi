@@ -498,6 +498,7 @@ public class CBGFacePassHandlerHelper extends ActivityWeakRefHolder {
                         public void run() {
                             if (onInitFacePassListener != null) {
                                 onInitFacePassListener.onInitError("人脸识别功能初始化失败: " + e.getMessage());
+                                Log.d(TAG, "limeFaceCamera 人脸识别功能初始化失败 501 == > : " + e.getMessage());
                             }
                         }
                     });
@@ -610,6 +611,7 @@ public class CBGFacePassHandlerHelper extends ActivityWeakRefHolder {
                         public void run() {
                             if (onInitFacePassListener != null) {
                                 onInitFacePassListener.onInitError("人脸识别功能初始化失败: " + e.getMessage());
+                                Log.d(TAG, "limeFaceCamera 人脸识别功能初始化失败 614 == > : " + e.getMessage());
                             }
                         }
                     });
