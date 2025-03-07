@@ -8,9 +8,11 @@
     
     <dimen name="size_line">0.7dp</dimen>
     <dimen name="size_space">6dp</dimen>
-
+    <dimen name="sp_8">8sp</dimen>
     <dimen name="btn_bg_radius">30dp</dimen>
-
+    <dimen name="dp_2">2dp</dimen>
+    <dimen name="dp_15">15dp</dimen>
+    <dimen name="sp_12">12sp</dimen>
     <dimen name="size_10sp">10sp</dimen>
     <dimen name="size_11sp">11sp</dimen>
     <dimen name="size_12sp">12sp</dimen>
@@ -27,7 +29,7 @@
     <dimen name="size_26sp">26sp</dimen>
     <dimen name="size_28sp">28sp</dimen>
     <dimen name="size_30sp">30sp</dimen>
-
+    <dimen name="dp_50">50dp</dimen>
     <dimen name="size_0dp">0dp</dimen>
     <dimen name="size_1dp">1dp</dimen>
     <dimen name="size_2dp">2dp</dimen>
@@ -74,5 +76,40 @@
     <dimen name="size_130dp">130dp</dimen>
     <dimen name="size_140dp">140dp</dimen>
     <dimen name="size_150dp">150dp</dimen>
-
+    <dimen name="dp_150">150dp</dimen>
+    <dimen name="sp_11">11sp</dimen>
+    <dimen name="sp_10">10sp</dimen>
+    <dimen name="dp_18">18dp</dimen>
+    <dimen name="dp_79">79dp</dimen>
+    <dimen name="dp_23">23dp</dimen>
+    <dimen name="dp_20">20dp</dimen>
+    <dimen name="dp_5">5dp</dimen>
+    <dimen name="dp_11">11dp</dimen>
+    <dimen name="dp_180">180dp</dimen>
+    <dimen name="dp_100">100dp</dimen>
+    <dimen name="dp_420">420dp</dimen>
+    <dimen name="dp_0_5">0.5dp</dimen>
+    <dimen name="dp_25">25dp</dimen>
+    <dimen name="dp_90">90dp</dimen>
+    <dimen name="dp_3">3dp</dimen>
+    <dimen name="dp_80">80dp</dimen>
+    <dimen name="dp_30">30dp</dimen>
+    <dimen name="dp_12">12dp</dimen>
+    <dimen name="dp_86">86dp</dimen>
+    <dimen name="dp_7">7dp</dimen>
+    <dimen name="dp_17">17dp</dimen>
+    <dimen name="dp_33">33dp</dimen>
+    <dimen name="dp_28">28dp</dimen>
+    <dimen name="dp_1_5">1.5dp</dimen>
+    <dimen name="dp_8">8dp</dimen>
+    <dimen name="dp_9">9dp</dimen>
+    <dimen name="dp_6">6dp</dimen>
+    <dimen name="dp_35">35dp</dimen>
+    <dimen name="dp_16">16dp</dimen>
+    <dimen name="dp_26">26dp</dimen>
+    <dimen name="dp_24">24dp</dimen>
+    <dimen name="sp_6">6sp</dimen>
+    <dimen name="sp_7">7sp</dimen>
+    <dimen name="sp_5">5sp</dimen>
+    <dimen name="sp_18">18sp</dimen>
 </resources>

@@ -29,6 +29,7 @@ import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Retrofit;
 
 /**
  * @description $
@@ -45,6 +46,7 @@ public class AppConfigModules extends FrameConfigModule {
                         @Override
                         public void applyOptions(OkHttpClient.Builder builder) {
                             //TODO 配置OkHttpClient
+
                             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
                             logging.setLevel(HttpLoggingInterceptor.Level.BODY);
                             builder.addInterceptor(logging);

@@ -31,8 +31,10 @@ import com.stkj.cashier.app.base.BaseFragment
 import com.stkj.cashier.app.base.helper.CommonTipsHelper
 import com.stkj.cashier.app.main.DifferentDisplay
 import com.stkj.cashier.app.main.DifferentDisplay.Companion.isStartFaceScan
+import com.stkj.cashier.app.main.MainActivity
 import com.stkj.cashier.app.stat.ConsumeStatFragment
 import com.stkj.cashier.bean.MessageEventBean
+import com.stkj.cashier.cbgfacepass.FacePassHelper
 import com.stkj.cashier.config.MessageEventType
 import com.stkj.cashier.constants.Constants
 import com.stkj.cashier.databinding.AmountFragment580Binding
@@ -66,6 +68,8 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
     var scanningCode = ""
 
     lateinit var scanCodeCallback: ScanCodeCallback
+
+    var facePassHelper: FacePassHelper? = null;
 
     var consumeStatFragment:ConsumeStatFragment = ConsumeStatFragment.newInstance()
 
@@ -659,6 +663,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
     }
 
     public fun modifyBalanceByScanCode(card: String) {
+        Log.d(TAG, "limescan  modifyBalanceByScanCode == > " + 549 + "  card: " + card)
         if (!TextUtils.isEmpty(card)) {
             var card = card.replace("\r", "")
             var map = hashMapOf<String, Any>()
@@ -1375,7 +1380,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
                                 binding.tvStatus.text = "-"
                                 scanCodeCallback?.stopScan()
                                 // 下载人脸
-//                                var mainActivity = activity as MainActivity
+                                var mainActivity = activity as MainActivity
 //                                Thread(Runnable {
 //                                    App.mFacePassHandler?.clearAllGroupsAndFaces()
 //                                    createGroup()
@@ -1385,9 +1390,15 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
 //                                    mainActivity.callBack = true
 //                                    LogUtils.e("lime== 全量更新弹窗")
 //                                    mainActivity.companyMember(0)
-//
+//                                    mActivity?.getWeakRefHolder(FacePassHelper::class.java)?.deleteAllFaceGroup(true);
 //                                }).start()
-
+                                Log.d(TAG,"limeFacePassHelper 1195 mainActivity == null: " + (mainActivity == null) )
+                                if (facePassHelper == null) {
+                                    facePassHelper = FacePassHelper(activity as MainActivity);
+                                }
+                                Log.d(TAG,"limeFacePassHelper 1195 facePassHelper == null: " + (facePassHelper == null) )
+                                facePassHelper!!.deleteAllFaceGroup(true);
+                                Log.d(TAG,"limeFacePassHelper 1196")
                             } else if (!mIsPaying) {
                                 //Led900(activity)?.on(100)
 //                                FaceUtil.GPIOSet("rgb_led_en", 1);

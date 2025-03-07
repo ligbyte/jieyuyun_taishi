@@ -1,5 +1,8 @@
 package com.stkj.cashier.app.base
 
+//import com.huayi.hgt.hyznjar.CustomAPI
+
+import android.annotation.SuppressLint
 import android.app.ActivityOptions
 import android.content.Context
 import android.content.Intent
@@ -17,11 +20,8 @@ import androidx.annotation.StringRes
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.ViewDataBinding
-import com.stkj.cashier.util.util.BarUtils
-import com.stkj.cashier.util.util.LogUtils
-//import com.huayi.hgt.hyznjar.CustomAPI
+import androidx.fragment.app.Fragment
 import com.king.base.util.StringUtils
-
 import com.king.frame.mvvmframe.base.BaseActivity
 import com.king.frame.mvvmframe.base.BaseModel
 import com.king.frame.mvvmframe.base.BaseViewModel
@@ -29,13 +29,24 @@ import com.stkj.cashier.App
 import com.stkj.cashier.R
 import com.stkj.cashier.app.home.HomeActivity
 import com.stkj.cashier.app.main.MainActivity
+import com.stkj.cashier.common.core.ActivityHolderHelper
+import com.stkj.cashier.common.core.ActivityWeakRefHolder
+import com.stkj.cashier.common.core.AppLoadingDialogHelper
+import com.stkj.cashier.common.utils.ActivityUtils
+import com.stkj.cashier.common.utils.FragmentUtils
+import com.stkj.cashier.common.utils.StatusBarUtils
 import com.stkj.cashier.constants.Constants
+import com.stkj.cashier.util.util.BarUtils
+import com.stkj.cashier.util.util.LogUtils
 import es.dmoral.toasty.Toasty
 
 /**
  * @author <a href="mailto:jenly1314@gmail.com">Jenly</a>
  */
 abstract class BaseActivity<VM : BaseViewModel<out BaseModel>,VDB : ViewDataBinding> : BaseActivity<VM,VDB>(){
+
+    var activityHolderHelper: ActivityHolderHelper = ActivityHolderHelper()
+    protected var loadingDialogHelper: AppLoadingDialogHelper = AppLoadingDialogHelper()
 
     fun getApp() = application as App
 
@@ -69,6 +80,11 @@ abstract class BaseActivity<VM : BaseViewModel<out BaseModel>,VDB : ViewDataBind
         BarUtils.setNavBarVisibility(this, true)
     }
     //-----------------------------------
+
+    override fun onDestroy() {
+        super.onDestroy()
+        activityHolderHelper.clear();
+    }
 
     fun showToast(@StringRes resId: Int){
         Toasty.normal(context,resId).show()
@@ -106,6 +122,7 @@ abstract class BaseActivity<VM : BaseViewModel<out BaseModel>,VDB : ViewDataBind
 
     //-----------------------------------
 
+    @SuppressLint("ClickableViewAccessibility")
     fun setClickRightClearListener(tv: TextView) {
         tv.setOnTouchListener { v: View?, event: MotionEvent ->
             when (event.action) {
@@ -125,6 +142,7 @@ abstract class BaseActivity<VM : BaseViewModel<out BaseModel>,VDB : ViewDataBind
     }
 
 
+    @SuppressLint("ClickableViewAccessibility")
     fun setClickRightEyeListener(et: EditText) {
         et.setOnTouchListener { v: View?, event: MotionEvent ->
             when (event.action) {
@@ -159,7 +177,7 @@ abstract class BaseActivity<VM : BaseViewModel<out BaseModel>,VDB : ViewDataBind
     //-----------------------------------
 
     fun startActivity(clazz: Class<*>,username: String? = null){
-        var intent = newIntent(clazz)
+        val intent = newIntent(clazz)
         intent.putExtra(Constants.KEY_USERNAME,username)
         startActivity(intent)
     }
@@ -178,9 +196,9 @@ abstract class BaseActivity<VM : BaseViewModel<out BaseModel>,VDB : ViewDataBind
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
         val options: ActivityOptions = ActivityOptions.makeBasic()
 
-        var mDisplayManager = getSystemService(Context.DISPLAY_SERVICE) as DisplayManager;
+        val mDisplayManager = getSystemService(Context.DISPLAY_SERVICE) as DisplayManager;
         //得到显示器数组
-        var displays = mDisplayManager.displays
+        val displays = mDisplayManager.displays
 
         if (displays.size>1){
             options.setLaunchDisplayId(  displays[1].displayId)
@@ -191,7 +209,7 @@ abstract class BaseActivity<VM : BaseViewModel<out BaseModel>,VDB : ViewDataBind
         startActivity(intent,options.toBundle())
     }
     fun startWebActivity(url: String,title: String? = null){
-        var intent = Intent(context, WebActivity::class.java)
+        val intent = Intent(context, WebActivity::class.java)
         title?.let {
             intent.putExtra(Constants.KEY_TITLE,it)
         }
@@ -208,6 +226,15 @@ abstract class BaseActivity<VM : BaseViewModel<out BaseModel>,VDB : ViewDataBind
         }
     }
 
+    fun <T : ActivityWeakRefHolder> getWeakRefHolder(tClass: Class<T>): T? {
+        return activityHolderHelper.get(tClass, this)
+    }
+
+
+    fun <T : ActivityWeakRefHolder?> clearWeakRefHolder(tClass: Class<T>?) {
+        activityHolderHelper.clear(tClass!!)
+    }
+
     // 定义一个回调接口
     interface MyCallback {
         fun onDataReceived(data: String)
@@ -222,5 +249,88 @@ abstract class BaseActivity<VM : BaseViewModel<out BaseModel>,VDB : ViewDataBind
     }
 
 
+    /**
+     * 获取内容占位布局id（弹窗和loading布局等）
+     */
+    fun getContentPlaceHolderId(): Int {
+        return 0
+    }
+
+
+    fun addContentPlaceHolderFragment(fragment: Fragment?) {
+        val contentPlaceHolderId: Int = getContentPlaceHolderId()
+        if (contentPlaceHolderId != 0) {
+            FragmentUtils.safeAddFragment(supportFragmentManager, fragment, contentPlaceHolderId)
+        } else {
+            //AppToast.toastMsg("添加内容失败")
+        }
+    }
+
+
+    fun showLoadingDialog() {
+        runUIThreadWithCheck(Runnable {
+            loadingDialogHelper.showLoadingDialog(
+                this@BaseActivity,
+                0,
+                ""
+            )
+        })
+    }
+
+    fun showLoadingDialog(loadingText: String?) {
+        runUIThreadWithCheck(Runnable {
+            loadingDialogHelper.showLoadingDialog(
+                this@BaseActivity,
+                0,
+                loadingText
+            )
+        })
+    }
+
+    fun showLoadingDialog(tag: Int) {
+        runUIThreadWithCheck(Runnable {
+            loadingDialogHelper.showLoadingDialog(
+                this@BaseActivity,
+                tag,
+                ""
+            )
+        })
+    }
+
+    fun showLoadingDialog(tag: Int, loadingText: String?) {
+        runUIThreadWithCheck(Runnable {
+            loadingDialogHelper.showLoadingDialog(
+                this@BaseActivity,
+                tag,
+                loadingText
+            )
+        })
+    }
+
+    fun hideLoadingDialog() {
+        runUIThreadWithCheck(Runnable { loadingDialogHelper.hideLoadingDialog(0) })
+    }
+
+    fun hideLoadingDialog(tag: Int) {
+        runUIThreadWithCheck(Runnable { loadingDialogHelper.hideLoadingDialog(tag) })
+    }
+
+    fun runUIThreadWithCheck(task: Runnable) {
+        if (!isActivityFinished()) {
+            runOnUiThread {
+                if (!isActivityFinished()) {
+                    task.run()
+                }
+            }
+        }
+    }
+
+    fun isActivityFinished(): Boolean {
+        return ActivityUtils.isActivityFinished(this)
+    }
+
+    fun setSystemBarMode(isLightMode: Boolean) {
+        StatusBarUtils.setSystemBarMode(this, isLightMode)
+    }
 
 }

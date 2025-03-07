@@ -464,20 +464,21 @@ class Consumption1SettingFragment :
                             "确认" -> {
                                 if (mPageIndex == 0) {
                                     if (currentSelectIndex == 1) {
-//                                        val switchFacePassPay = binding.ivSwitchFacePass.isSelected
-//                                        binding.ivSwitchFacePass.isSelected = !switchFacePassPay
-//                                        if (binding.ivSwitchFacePass.isSelected) {
-//                                            SPUtils.getInstance()
-//                                                .put(Constants.SWITCH_FACE_PASS_PAY, true)
-//                                            EventBus.getDefault()
-//                                                .post(MessageEventBean(MessageEventType.OpenFacePassPay))
-//                                        } else {
-//                                            SPUtils.getInstance()
-//                                                .put(Constants.SWITCH_FACE_PASS_PAY, false)
-//                                            EventBus.getDefault()
-//                                                .post(MessageEventBean(MessageEventType.CloseFacePassPay))
-//                                        }
+                                        val switchFacePassPay = binding.ivSwitchFacePass.isSelected
+                                        binding.ivSwitchFacePass.isSelected = !switchFacePassPay
+                                        if (binding.ivSwitchFacePass.isSelected) {
+                                            SPUtils.getInstance()
+                                                .put(Constants.SWITCH_FACE_PASS_PAY, true)
+                                            EventBus.getDefault()
+                                                .post(MessageEventBean(MessageEventType.OpenFacePassPay))
+                                        } else {
+                                            SPUtils.getInstance()
+                                                .put(Constants.SWITCH_FACE_PASS_PAY, false)
+                                            EventBus.getDefault()
+                                                .post(MessageEventBean(MessageEventType.CloseFacePassPay))
+                                        }
 //                                        ttsSpeak("人脸识别正在开发中，敬请期待")
+
                                     } else if (currentSelectIndex == 2) {
                                         val switchTongLianPay = binding.ivSwitchTongLianPay.isSelected
                                         binding.ivSwitchTongLianPay.isSelected = !switchTongLianPay
@@ -728,6 +729,9 @@ class Consumption1SettingFragment :
 
     private fun refreshFirstPageData() {
         binding.tvDeviceSerialNumber.text = App.serialNumber + "/" + BuildConfig.VERSION_NAME
+        val facePassPaySwitch =
+            SPUtils.getInstance().getBoolean(Constants.SWITCH_FACE_PASS_PAY, false)
+        binding.ivSwitchFacePass.isSelected = facePassPaySwitch
         binding.ivSwitchFacePass.isSelected =  SPUtils.getInstance().getBoolean(Constants.SWITCH_FACE_PASS_PAY, false)
         binding.ivSwitchTongLianPay.isSelected = SPUtils.getInstance().getBoolean(Constants.SWITCH_TONG_LIAN_PAY)
     }
