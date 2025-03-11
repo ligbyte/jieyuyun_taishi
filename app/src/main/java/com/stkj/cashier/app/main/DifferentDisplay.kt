@@ -47,13 +47,12 @@ import com.stkj.cashier.ui.widget.FacePassCameraLayout
 import com.stkj.cashier.util.SettingVar
 import com.stkj.cashier.util.camera.CameraManager
 import com.stkj.cashier.util.camera.CameraPreviewData
-import com.stkj.cashier.util.camera.ComplexFrameHelper
-import com.stkj.cashier.util.camera.FacePassCameraType
 import com.stkj.cashier.util.camera.RecognizeData
 import com.stkj.cashier.util.rxjava.DefaultDisposeObserver
 import com.stkj.cashier.util.util.LogUtils
 import com.stkj.cashier.util.util.SPUtils
 import com.stkj.cashier.util.util.SpanUtils
+import com.stkj.cashier.util.util.ThreadUtils.runOnUiThread
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.observers.DisposableObserver
@@ -127,9 +126,6 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
     var mRecognizeDataQueue: ArrayBlockingQueue<RecognizeData> = ArrayBlockingQueue(5)
     var mFeedFrameQueue: ArrayBlockingQueue<CameraPreviewData> = ArrayBlockingQueue(1)
 
-    /*recognize thread*/
-    var mRecognizeThread: RecognizeThread? = null
-    var mFeedFrameThread: FeedFrameThread? = null
 
     constructor(outerContext: Context, display: Display) : super(outerContext, display){
         this.outerContext = outerContext
@@ -197,7 +193,7 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
         val switchFacePassPay = SPUtils.getInstance().getBoolean(Constants.SWITCH_FACE_PASS_PAY, false)
 
         if (switchFacePassPay) {
-            goFacePassAuth()
+//            goFacePassAuth()
 //            openAndInitCamera()
 //            startFacePassDetect()
 //            ivCameraOverLayer?.visibility = View.GONE
@@ -223,36 +219,6 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
 
 
     /**
-     * 开始人脸识别
-     */
-    private fun startFacePassDetect() {
-        try {
-            clearFacePassQueueCache()
-            mRecognizeThread = RecognizeThread()
-            mRecognizeThread!!.start()
-            mFeedFrameThread = FeedFrameThread()
-            mFeedFrameThread!!.start()
-        } catch (e: Throwable) {
-            Log.e("TAG", "limeException 236: " + e.message)
-        }
-    }
-
-    /**
-     * 停止人脸识别
-     */
-    private fun stopFacePassDetect() {
-        try {
-            mRecognizeThread?.isInterrupt = true
-            mFeedFrameThread?.isInterrupt = true
-            mRecognizeThread = null
-            mFeedFrameThread = null
-            clearFacePassQueueCache()
-        } catch (e: Throwable) {
-            Log.e("TAG", "limeException 251: " + e.message)
-        }
-    }
-
-    /**
      * 清理人脸识别队列缓存
      */
     private fun clearFacePassQueueCache() {
@@ -264,7 +230,7 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
         try {
             super.show()
         } catch (e: Throwable) {
-            Log.e("TAG", "limeException 267: " + e.message)
+            Log.e(TAG, "limeException 267: " + e.message)
             Log.d(TAG,"limescreen 259 副屏初始化失败" + e.message)
         }
     }
@@ -399,167 +365,7 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
         }
     }
 
-    /**
-     * 识别线程
-     * */
-    inner class RecognizeThread : Thread() {
-        var isInterrupt = false
-        override fun run() {
-            while (!isInterrupt) {
 
-//                try {
-//                    Log.d("DEBUG_TAG", "RecognizeData >>>>1")
-//                    val recognizeData: RecognizeData = mRecognizeDataQueue.take()
-//                    var recognizeResult: Array<FacePassRecognitionResult>? = null
-//                    if (isStartFaceScan.get()) {
-//                        Log.d("DEBUG_TAG", "RecognizeData >>>>2")
-//
-//                        recognizeResult = App.mFacePassHandler?.recognize(
-//                            Constants.GROUP_NAME,
-//                            recognizeData.message,
-//                            1,
-//                            recognizeData.trackOpt[0].trackId,
-//                            FacePassRecogMode.FP_REG_MODE_DEFAULT,
-//                            recognizeData.trackOpt[0].livenessThreshold,
-//                            recognizeData.trackOpt[0].searchThreshold
-//                        )
-//                        //                        FacePassRecognitionResult[][] recognizeResultArray = mFacePassHandler.recognize(group_name, recognizeData.message, 1, recognizeData.trackOpt);
-////                        if (recognizeResultArray != null && recognizeResultArray.length > 0) {
-////                            for (FacePassRecognitionResult[] recognizeResult : recognizeResultArray) {
-////                                if (recognizeResult != null && recognizeResult.length > 0) {
-//                        Log.d("DEBUG_TAG", "RecognizeData >>>>" + recognizeResult?.size)
-//                        if (recognizeResult != null && recognizeResult.isNotEmpty()) {
-//                            for (result in recognizeResult) {
-//                                //判断人脸相似程度 >75表示成功 否侧失败处理
-//                                if (result.detail != null && result.detail.searchScore < 75) {
-//                                    runOnUiThread {
-//                                        handleFacePassFailRetryDelay()
-//                                    }
-//                                    break
-//                                }
-//                                val faceToken = String(result.faceToken, charset("ISO-8859-1"))
-//                                LogUtils.e(
-//                                    "recognizeResult识别出来的人脸",
-//                                    faceToken + "/" + result.recognitionState
-//                                )
-//                                var faceTokens: Array<ByteArray>? = null
-//                                if (App.mFacePassHandler != null) {
-//                                    faceTokens =
-//                                        App.mFacePassHandler!!.getLocalGroupInfo(Constants.GROUP_NAME)
-//                                }
-//                                val faceTokenList: MutableList<kotlin.String> =
-//                                    java.util.ArrayList()
-//                                if (faceTokens?.isNotEmpty() == true) {
-//                                    for (j in faceTokens?.indices!!) {
-//                                        if (faceTokens[j].isNotEmpty()) {
-//                                            faceTokenList.add(kotlin.text.String(faceTokens[j]))
-//                                        }
-//                                    }
-//                                }
-//                                LogUtils.e("底库的人脸", "数量" + faceTokenList.size)
-//                               // CompanyMemberBiz.getCompanyMember2()
-//
-//                                if (faceToken.isNotEmpty() && FacePassRecognitionState.RECOGNITION_PASS == result.recognitionState) {
-//                                    EventBus.getDefault().post(
-//                                        MessageEventBean(
-//                                            MessageEventType.MainResume
-//                                        )
-//                                    )
-//                                    //金额模式
-//                                    isStartFaceScan.set(false)
-//                                    companyMember =
-//                                        CompanyMemberBiz.getCompanyMember(faceToken)
-//                                    if (companyMember != null) {
-//                                        clearFacePassQueueCache()
-//                                        resetFacePassRetryDelay()
-//                                        ttsSpeak("识别成功")
-//                                        runOnUiThread {
-//                                            tvFaceTips2.visibility = View.VISIBLE
-//                                            tvFaceTips2.text = "识别成功"
-//                                            if (companyMember != null) {
-//                                                showSuccessFace(companyMember!!.imgData)
-//                                            }
-//                                        }
-//
-//                                        EventBus.getDefault().post(
-//                                            MessageEventBean(
-//                                                MessageEventType.AmountToken,
-//                                                faceToken
-//                                            )
-//                                        )
-//                                    } else {
-//
-//                                        try {
-//                                            val b = mFacePassHandler!!.deleteFace(
-//                                                faceToken.toByteArray(StandardCharsets.ISO_8859_1)
-//                                            )
-//                                            //重新识别
-//                                            App.mFacePassHandler?.reset()
-//                                            LogUtils.e("人脸匹配失败,删除地库人脸token成功" + faceToken + "==" + b)
-//                                        } catch (e: Exception) {
-//                                            e.printStackTrace()
-//                                            LogUtils.e("人脸匹配失败,删除地库人脸token失败" + faceToken + e.message)
-//                                        }
-//                                    }
-//                                } else if (FacePassRecognitionState.RECOGNITION_PASS != result.recognitionState) {
-//                                    //  ttsSpeak("本地暂无人脸信息")
-//                                    runOnUiThread {
-//                                        handleFacePassFailRetryDelay()
-//                                    }
-//                                }
-////                                var resultGson =
-////                                    FacePassRecognitionResultToGson(
-////                                        result.trackId,
-////                                        faceToken,
-////                                        result.detail!!,
-////                                        String(result.featureData),
-////                                        result.recognitionState,
-////                                        result.searchErrorCode,
-////                                        result.livenessErrorCode,
-////                                        result.smallSearchErrorCode
-////                                    )
-////                            val idx: Int = findidx(ageGenderResult, result.trackId)
-////                                LogUtils.e("recognize ", Gson().toJson(resultGson))
-////                            if (idx == -1) {
-////                                showRecognizeResult(
-////                                    result.trackId,
-////                                    result.detail.searchScore,
-////                                    result.detail.livenessScore,
-////                                    !TextUtils.isEmpty(faceToken)
-////                                )
-////                            } else {
-////                                showRecognizeResult(
-////                                    result.trackId,
-////                                    result.detail.searchScore,
-////                                    result.detail.livenessScore,
-////                                    !TextUtils.isEmpty(faceToken),
-////                                    ageGenderResult!![idx].age,
-////                                    ageGenderResult[idx].gender
-////                                )
-////                            }
-//                            }
-//                        }
-////                        else{
-////                            ttsSpeak("本地暂无人脸信息")
-////                        }
-//                        //                                }
-////                            }
-////                        }
-//                    }
-//                } catch (e: Exception) {
-//                    e.printStackTrace()
-//                    LogUtils.e("recognize-Exception", e.message)
-//                } catch (e: FacePassException) {
-//                    e.printStackTrace()
-//                }
-            }
-        }
-
-        override fun interrupt() {
-            isInterrupt = true
-            super.interrupt()
-        }
-    }
 
     private var canSpeakFacePassFail = true
     private var canSpeakFacePassFailObserver: DisposableObserver<Long>? = null
@@ -596,13 +402,13 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
     }
 
     override fun onPictureTaken(cameraPreviewData: CameraPreviewData?) {
-        if (mFeedFrameThread != null && !mFeedFrameThread!!.isInterrupt) {
-            if (App.cameraType == FacePassCameraType.FACEPASS_DUALCAM) {
-                ComplexFrameHelper.addRgbFrame(cameraPreviewData)
-            } else {
-                mFeedFrameQueue.offer(cameraPreviewData)
-            }
-        }
+//        if (mFeedFrameThread != null && !mFeedFrameThread!!.isInterrupt) {
+//            if (App.cameraType == FacePassCameraType.FACEPASS_DUALCAM) {
+//                ComplexFrameHelper.addRgbFrame(cameraPreviewData)
+//            } else {
+//                mFeedFrameQueue.offer(cameraPreviewData)
+//            }
+//        }
     }
 
     private fun showSuccessFace(imageUrl:String){
@@ -684,6 +490,7 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
     }
 
     //接收事件
+    @SuppressLint("CheckResult")
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true, priority = 1)
     open fun onEventReceiveMsg(message: MessageEventBean) {
         try{
@@ -979,7 +786,7 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
                 tvTime.text = "${split[1]} ${split[2]}"
             }
         } catch (e: Throwable) {
-            Log.e("TAG", "limeException 982: " + e.message)
+            Log.e(TAG, "limeException 982: " + e.message)
         }
     }
 
@@ -1193,6 +1000,7 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
         cbgCameraHelper?.setOnDetectFaceListener(object :
             CBGFacePassHandlerHelper.OnDetectFaceListener {
             override fun onDetectFaceToken(faceTokenList: List<CBGFacePassRecognizeResult?>?) {
+                Log.i(TAG, "limeprocessFacePassResult onDetectFaceToken 1196")
                 processFacePassResult(faceTokenList)
             }
 
@@ -1205,7 +1013,7 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
                 cbgCameraHelper?.prepareFacePassDetect()
                 cbgCameraHelper?.startFacePassDetect()
             } catch (e: Throwable) {
-                Log.e("TAG", "limeException 1208: " + e.message)
+                Log.e(TAG, "limeException 1208: " + e.message)
             }
         }
     }
@@ -1281,25 +1089,19 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
 
     protected fun handleFacePassSuccess(facePassPeopleInfo: FacePassPeopleInfo?) {
         //人脸识别成功
-        ttsSpeak("识别成功,支付中")
-
-//        val switchConsumerConfirm: Boolean = PaymentSettingMMKV.getSwitchConsumerConfirm()
-//        if (switchConsumerConfirm) {
-//            ttsSpeak("识别成功,请确认支付")
-//            ConsumerManager.INSTANCE.setConsumerConfirmFaceInfo(
-//                facePassPeopleInfo,
-//                true,
-//                PayConstants.PAY_TYPE_FACE
-//            )
-//        } else {
-//            ttsSpeak("识别成功,支付中")
-//            ConsumerManager.INSTANCE.setConsumerConfirmFaceInfo(
-//                facePassPeopleInfo,
-//                false,
-//                PayConstants.PAY_TYPE_FACE
-//            )
-//        }
-
+        clearFacePassQueueCache()
+        resetFacePassRetryDelay()
+        ttsSpeak("识别成功")
+        runOnUiThread {
+            tvFaceTips2.visibility = View.VISIBLE
+            tvFaceTips2.text = "识别成功"
+            if (companyMember != null) {
+                showSuccessFace(companyMember!!.imgData)
+            }
+        }
+        Log.d(TAG,"limeAmountToken  handleFacePassSuccess Full_Name: " + facePassPeopleInfo?.full_Name)
+        EventBus.getDefault()
+            .post(MessageEventBean(MessageEventType.AmountToken, facePassPeopleInfo?.cbgFaceToken,facePassPeopleInfo?.card_Number))
     }
 
     protected fun handleFacePassError(canSpeakFacePassFail: Boolean, recognizeState: Int) {

@@ -1988,7 +1988,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
 //            var isFaceDualCamera = DeviceManager.getInstance().isSupportDualCamera() &&
 //                    CBGFacePassConfigMMKV.isOpenDualCamera()
             Log.e(TAG, "limeFaceCamera onCreateFacePreviewView ========================================== : " + 1994)
-            cbgCameraHelper?.setPreviewView(previewView, irPreview, true)
+            cbgCameraHelper?.setPreviewView(previewView, irPreview, false)
             GlobalScope.launch {
                 try {
                     cbgCameraHelper?.prepareFacePassDetect()

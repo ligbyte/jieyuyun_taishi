@@ -113,9 +113,9 @@ public class CBGCameraHelper extends ActivityWeakRefHolder {
                         public void onPreviewFrame(byte[] data, Camera camera, int displayOrientation, int previewOrientation) {
                             try {
                                 Log.i(TAG, "limeopenCamera prepareFacePassDetect 114");
-                                if (!facePassHandlerHelper.isStartFrameDetectTask()) {
-                                    return;
-                                }
+//                                if (!facePassHandlerHelper.isStartFrameDetectTask()) {
+//                                    return;
+//                                }
                                 Log.i(TAG, "limeopenCamera prepareFacePassDetect 117");
                                 Camera.Parameters parameters = camera.getParameters();
                                 int width = parameters.getPreviewSize().width;

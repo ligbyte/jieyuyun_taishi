@@ -115,7 +115,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
         var mIsPaying = false
     }
 
-    @SuppressLint("CheckResult")
+    @SuppressLint("CheckResult", "AutoDispose")
     override fun initData(savedInstanceState: Bundle?) {
         super.initData(savedInstanceState)
         try{
@@ -544,12 +544,13 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
         return R.layout.amount_fragment_580
     }
 
-    private fun modifyBalanceByFaceToken(faceToken: String) {
-        var companyMember = CompanyMemberBiz.getCompanyMember(faceToken)
-        if (companyMember != null) {
+    private fun modifyBalanceByFaceToken(faceToken: String, cardNumber: String) {
+        Log.d(TAG,"limeAmountToken  modifyBalanceByFaceToken: " + 548)
+//        var companyMember = CompanyMemberBiz.getCompanyMember(faceToken)
+//        if (companyMember != null) {
             var map = hashMapOf<String, Any>()
             map["mode"] = "ModifyBalance"
-            map["cardNumber"] = companyMember.cardNumber
+            map["cardNumber"] = cardNumber
             map["consumption_type"] = 10
             map["deduction_Type"] = 60
             /* val randoms = (1000..9999).random().toString()
@@ -565,13 +566,14 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
 
             var md5 =
                 EncryptUtils.encryptMD5ToString16(
-                    companyMember.cardNumber + "&60&" + App.serialNumber + "&" + getRealPayMoney()
+                    cardNumber + "&60&" + App.serialNumber + "&" + getRealPayMoney()
                             + "&" + onlineOrderNumber
                 )
             map["sign"] = md5
+            Log.d(TAG,"limeAmountToken  modifyBalanceByFaceToken: " + 573)
             viewModel.modifyBalance(map)
 
-        }
+//        }
 
 
     }
@@ -718,6 +720,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
 
     }
 
+    @SuppressLint("AutoDispose", "CheckResult")
     private fun getPayStatus(payNo: String) {
         Observable.timer(2, TimeUnit.SECONDS)
             .subscribeOn(Schedulers.io())
@@ -824,6 +827,10 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
 
     private fun modifyBalanceNotice() {
         sendConsumerModifyBalanceNotice()
+        if (SPUtils.getInstance().getBoolean(Constants.SWITCH_FACE_PASS_PAY, false)) {
+            EventBus.getDefault()
+                .post(MessageEventBean(MessageEventType.OpenFacePassPay))
+        }
 //        ttsSpeak("请支付")
     }
 
@@ -869,6 +876,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
         when (message.type) {
             MessageEventType.AmountToken -> {
                 message.content?.let {
+                    Log.d(TAG,"limeAmountToken 877 token: " + it)
                     if (mIsRefund) {
                         handelRefundByFaceToken(it)
                     } else {
@@ -881,7 +889,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
                             return
                         }
                         refreshPayingStatus()
-                        modifyBalanceByFaceToken(it)
+                        modifyBalanceByFaceToken(it,message.ext!!)
                     }
                 }
             }

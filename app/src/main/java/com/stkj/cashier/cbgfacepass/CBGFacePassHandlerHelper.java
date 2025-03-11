@@ -302,10 +302,12 @@ public class CBGFacePassHandlerHelper extends ActivityWeakRefHolder {
     private final AtomicBoolean recognizeFrameTask = new AtomicBoolean(false);
 
     public void startRecognizeFrameTask() {
+        Log.i(TAG, "limeprocessFacePassResult startRecognizeFrameTask 305 ");
         if (mFacePassHandler != null) {
             if (recognizeFrameTask.get()) {
                 return;
             }
+            Log.i(TAG, "limeprocessFacePassResult startRecognizeFrameTask 310 ");
             recognizeFrameTask.set(true);
             Schedulers.io().scheduleDirect(new Runnable() {
                 @Override
@@ -341,11 +343,13 @@ public class CBGFacePassHandlerHelper extends ActivityWeakRefHolder {
                                             Log.d(TAG,"--CBGFacePassHandlerHelper-startRecognizeFrameTask--recognizeResult faceToken = " + faceToken + " recognitionState=" + recognizeResult.recognitionState);
                                         }
                                     }
+                                    Log.i(TAG, "limeprocessFacePassResult startRecognizeFrameTask 347 faceTokenList.isEmpty(): " + faceTokenList.isEmpty());
                                     if (!faceTokenList.isEmpty()) {
                                         Log.d(TAG,"--CBGFacePassHandlerHelper-stopFacePass-faceTokenList:" + faceTokenList.size());
                                         runUIThreadWithCheck(new Runnable() {
                                             @Override
                                             public void run() {
+                                                Log.i(TAG, "limeprocessFacePassResult startRecognizeFrameTask 349  onDetectFaceListener != null: " + (onDetectFaceListener != null));
                                                 if (onDetectFaceListener != null) {
                                                     onDetectFaceListener.onDetectFaceToken(faceTokenList);
                                                 }
