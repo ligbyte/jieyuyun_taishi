@@ -1,5 +1,7 @@
 package com.stkj.cashier.util;
 
+import android.util.Log;
+
 /**
  * @description $ 卖宝乐 称重 串口数据解析
  * @author: Administrator
@@ -18,7 +20,7 @@ public class Hex2StringUtlis {
             try {
                 bArr[i] = (byte) (Integer.parseInt(replace.substring(i2, i2 + 2), 16) & 255);
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e("TAG", "limeException 21: " + e.getMessage());
             }
         }
         try {

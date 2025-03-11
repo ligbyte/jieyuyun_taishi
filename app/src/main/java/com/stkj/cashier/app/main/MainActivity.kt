@@ -114,7 +114,6 @@ import java.net.SocketTimeoutException
 import java.nio.charset.StandardCharsets
 import java.util.LinkedList
 import java.util.Objects
-import java.util.Arrays
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -171,6 +170,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
     private var scanCount = 0
     private var mHandlerThread: HandlerThread? = null
     private var mWorkHandler: Handler? = null
+    private var cbgCameraHelper: CBGCameraHelper? = getWeakRefHolder(CBGCameraHelper::class.java)
     //private var isFinish = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -203,7 +203,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
             handlePayLogic()
 
     } catch (e: Throwable) {
-        e.printStackTrace()
+            Log.e("TAG", "limeException 206: " + e.message)
     }
 
     }
@@ -282,7 +282,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                             }
                             LogUtils.e("cardData", card)
                         } catch (e: Throwable) {
-                            e.printStackTrace()
+                            Log.e("TAG", "limeException 285: " + e.message)
                             LogUtils.e("读取卡数据失败", e.localizedMessage)
                             //读取卡数据失败
                         }
@@ -290,9 +290,11 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                 }
                 serialHelper.open()
             } catch (e: Throwable) {
-                e.printStackTrace()
+                Log.e("TAG", "limeException 293: " + e.message)
             }
     }
+
+
 
 
     private fun openSerial() {
@@ -332,14 +334,14 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                         mFos = FileOutputStream(mFile)
                         mFos!!.write(data.toByteArray(StandardCharsets.UTF_8))
                         writingFile = true
-                    } catch (pE: IOException) {
-                        pE.printStackTrace()
+                    } catch (e: IOException) {
+                        Log.e("TAG", "limeException 338: " + e.message)
                     }
                 } else {
                     try {
                         mFos!!.write(data.toByteArray(StandardCharsets.UTF_8))
-                    } catch (pE: IOException) {
-                        pE.printStackTrace()
+                    } catch (e: IOException) {
+                        Log.e("TAG", "limeException 161: " + e.message)
                     }
                 }
 
@@ -474,7 +476,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
 //        mWorkHandler!!.sendMessage(message)
 
     } catch (e: Throwable) {
-        e.printStackTrace()
+           Log.e("TAG", "limeException 479: " + e.message)
     }
     }
 
@@ -846,7 +848,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
         SystemEventHelper.INSTANCE.addSystemEventListener(systemEventListener)
             initFaceRecognition()
     } catch (e: Throwable) {
-        e.printStackTrace()
+            Log.e("TAG", "limeException 851: " + e.message)
     }
     }
 
@@ -1087,7 +1089,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                             "-facePassHelper-addFacePassToLocal--cardNumber: " + item.cardNumber
                                     + " load imageData error " + item.imgData
                         )
-                        e.printStackTrace()
+                        Log.e("TAG", "limeException 1092: " + e.message)
                     }
                     // var base64ToBitmap = ImageUtils.base64ToBitmap(item.imgData)
                     try {
@@ -1134,7 +1136,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
 //                                toast("bind  $result")
                                     LogUtils.e("addFace", "bind  $result")
                                 } catch (e: Exception) {
-                                    e.printStackTrace()
+                                    Log.e("TAG", "limeException 1139: " + e.message)
 //                                toast(e.message)
                                 }
                             } else {
@@ -1143,7 +1145,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                             }
                         }
                     } catch (e: Exception) {
-                        e.printStackTrace()
+                        Log.e("TAG", "limeException 1148: " + e.message)
                         LogUtils.e("lime== addFace", item.fullName + e.message)
                         // toast(e.message)
                     } finally {
@@ -1476,6 +1478,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
 
     override fun onPause() {
         super.onPause()
+        cbgCameraHelper?.releaseCameraHelper()
         LogUtils.e("主页onPause")
     }
 
@@ -1676,6 +1679,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
         currentTimeDisposable?.dispose()
         netStatusDisposable?.dispose()
         mPresentation?.dismiss()
+        cbgCameraHelper?.releaseCameraHelper()
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -1981,23 +1985,20 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
 
 
         mWorkHandler?.postDelayed({
-
-            //异步初始化相机模块
-            Schedulers.io().scheduleDirect {
+//            var isFaceDualCamera = DeviceManager.getInstance().isSupportDualCamera() &&
+//                    CBGFacePassConfigMMKV.isOpenDualCamera()
+            Log.e(TAG, "limeFaceCamera onCreateFacePreviewView ========================================== : " + 1994)
+            cbgCameraHelper?.setPreviewView(previewView, irPreview, true)
+            GlobalScope.launch {
                 try {
-                    var cbgCameraHelper: CBGCameraHelper? = getWeakRefHolder(CBGCameraHelper::class.java)
-                    var isFaceDualCamera = DeviceManager.getInstance().isSupportDualCamera() &&
-                            CBGFacePassConfigMMKV.isOpenDualCamera()
-                    cbgCameraHelper?.setPreviewView(previewView, irPreview, isFaceDualCamera)
                     cbgCameraHelper?.prepareFacePassDetect()
-
                 } catch (e: Throwable) {
                     e.printStackTrace()
                 }
             }
 
 
-        },2000)
+        },3000)
 
 
     }

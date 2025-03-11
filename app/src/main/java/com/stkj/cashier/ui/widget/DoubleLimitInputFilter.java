@@ -3,6 +3,7 @@ package com.stkj.cashier.ui.widget;
 import android.text.InputFilter;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -49,7 +50,7 @@ public class DoubleLimitInputFilter implements InputFilter {
                 return null;
             }
         } catch (Throwable e) {
-            e.printStackTrace();
+            Log.e("TAG", "limeException 53: " + e.getMessage());
         }
         return "";
     }

@@ -10,7 +10,6 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
 import android.text.TextUtils
 import android.util.Log
 import android.view.Choreographer
@@ -18,7 +17,6 @@ import android.view.View
 import android.view.View.FOCUS_DOWN
 import android.view.View.GONE
 import android.view.View.VISIBLE
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -43,9 +41,14 @@ import com.stkj.cashier.greendao.biz.CompanyMemberBiz
 import com.stkj.cashier.scan.ScanCodeCallback
 import com.stkj.cashier.util.PriceUtils
 import com.stkj.cashier.util.RkSysTool
-import com.stkj.cashier.util.ShellUtils
 import com.stkj.cashier.util.TimeUtils
-import com.stkj.cashier.util.util.*
+import com.stkj.cashier.util.util.EncryptUtils
+import com.stkj.cashier.util.util.GsonUtils
+import com.stkj.cashier.util.util.LogUtils
+import com.stkj.cashier.util.util.NetworkUtils
+import com.stkj.cashier.util.util.SPUtils
+import com.stkj.cashier.util.util.SpanUtils
+import com.stkj.cashier.util.util.ToastUtils
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
@@ -54,7 +57,6 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 import mcv.facepass.FacePassException
 import org.greenrobot.eventbus.EventBus
 import java.math.BigDecimal
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 
@@ -64,6 +66,7 @@ import java.util.concurrent.TimeUnit
 @AndroidEntryPoint
 class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
     View.OnClickListener {
+
 
     var scanningCode = ""
 
@@ -512,7 +515,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
         CommonTipsHelper.INSTANCE.setMainTipsView(binding.ctvAmount)
 
     } catch (e: Throwable) {
-        e.printStackTrace()
+            Log.e("TAG", "limeException 517: " + e.message)
     }
     }
 

@@ -9,8 +9,6 @@ import android.view.Choreographer
 import android.view.View
 import android.widget.TextView
 import androidx.core.view.isVisible
-import com.stkj.cashier.util.util.LogUtils
-import com.stkj.cashier.util.util.SPUtils
 import com.jakewharton.processphoenix.ProcessPhoenix
 import com.stkj.cashier.App
 import com.stkj.cashier.BuildConfig
@@ -24,6 +22,8 @@ import com.stkj.cashier.constants.Constants
 import com.stkj.cashier.databinding.Consumption1SettingFragmentBinding
 import com.stkj.cashier.dict.HomeMenu
 import com.stkj.cashier.util.ShellUtils
+import com.stkj.cashier.util.util.LogUtils
+import com.stkj.cashier.util.util.SPUtils
 import dagger.hilt.android.AndroidEntryPoint
 import org.greenrobot.eventbus.EventBus
 
@@ -139,7 +139,7 @@ class Consumption1SettingFragment :
 
         showFirstPage()
     } catch (e: Throwable) {
-        e.printStackTrace()
+         Log.e("TAG", "limeException 142: " + e.message)
     }
     }
 

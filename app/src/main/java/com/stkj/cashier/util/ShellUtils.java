@@ -1,5 +1,7 @@
 package com.stkj.cashier.util;
 
+import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -155,9 +157,9 @@ public class ShellUtils {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e("TAG", "limeException 160: " + e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("TAG", "limeException 162: " + e.getMessage());
         } finally {
             try {
                 if (os != null) {
@@ -170,7 +172,7 @@ public class ShellUtils {
                     errorResult.close();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.e("TAG", "limeException 175: " + e.getMessage());
             }
             if (process != null) {
                 process.destroy();

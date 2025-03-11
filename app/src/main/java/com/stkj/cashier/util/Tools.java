@@ -177,7 +177,7 @@ public class Tools {
         try {
             return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(str).getTime();
         } catch (ParseException e) {
-            e.printStackTrace();
+            Log.e("TAG", "limeException 180: " + e.getMessage());
             return 0L;
         }
     }

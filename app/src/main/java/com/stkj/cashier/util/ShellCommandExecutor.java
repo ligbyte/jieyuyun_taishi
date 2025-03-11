@@ -46,7 +46,7 @@ public class ShellCommandExecutor {
                  fileOutputStream.write(cmd.getBytes());
                 fileOutputStream.flush();
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e("TAG", "limeException 49: " + e.getMessage());
 
             }finally {
                 if(fileOutputStream!=null)

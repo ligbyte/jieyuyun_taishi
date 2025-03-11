@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -157,7 +158,7 @@ public class FileCertUtil {
 
                 return sb.toString();
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.e("TAG", "limeException 161: " + e.getMessage());
             }finally {
 
                 if(inputStream == null){
@@ -165,7 +166,7 @@ public class FileCertUtil {
                     try {
                         inputStream.close();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        Log.e("TAG", "limeException 169: " + e.getMessage());
                     }
                 }
 

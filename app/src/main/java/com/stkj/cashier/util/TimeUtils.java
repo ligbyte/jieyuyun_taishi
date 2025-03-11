@@ -1,6 +1,7 @@
 package com.stkj.cashier.util;
 
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
@@ -17,7 +18,7 @@ public class TimeUtils {
             beginTime = LocalTime.parse(start);
             endTime = LocalTime.parse(end);
         } catch (Throwable e) {
-            e.printStackTrace();
+            Log.e("TAG", "limeException 21: " + e.getMessage());
         }
         if (beginTime == null || endTime == null) {
             return false;

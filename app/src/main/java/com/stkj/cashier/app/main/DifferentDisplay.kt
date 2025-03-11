@@ -11,7 +11,6 @@ import android.os.Build
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.util.Log
-import android.util.Pair
 import android.view.Display
 import android.view.KeyEvent
 import android.view.View
@@ -21,16 +20,12 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.TextView
-
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.stkj.cashier.util.util.*
-import com.stkj.cashier.util.util.ThreadUtils.runOnUiThread
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.stkj.cashier.App
-import com.stkj.cashier.App.instance.mFacePassHandler
 import com.stkj.cashier.R
 import com.stkj.cashier.app.adapter.ConsumeRefundListAdapter
 import com.stkj.cashier.app.base.helper.CommonTipsHelper
@@ -47,7 +42,6 @@ import com.stkj.cashier.cbgfacepass.model.CBGFacePassRecognizeResult
 import com.stkj.cashier.cbgfacepass.model.FacePassPeopleInfo
 import com.stkj.cashier.config.MessageEventType
 import com.stkj.cashier.constants.Constants
-import com.stkj.cashier.glide.GlideApp
 import com.stkj.cashier.greendao.biz.CompanyMemberBiz
 import com.stkj.cashier.ui.widget.FacePassCameraLayout
 import com.stkj.cashier.util.SettingVar
@@ -64,13 +58,11 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.observers.DisposableObserver
 import io.reactivex.rxjava3.schedulers.Schedulers
-import mcv.facepass.FacePassException
-import mcv.facepass.types.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
-import java.nio.charset.StandardCharsets
-import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -122,7 +114,7 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
 //    private var ivSuccessHeader:ImageView? = null
 
     /* 相机实例 */
-    private var cameraManager: CameraManager? = null
+//    private var cameraManager: CameraManager? = null
 
     private val cameraRotation = SettingVar.cameraPreviewRotation
 
@@ -152,10 +144,13 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
         setCancelable(false)
         setContentView(R.layout.layout_different_display_2)
             fpcFace = findViewById(R.id.fpc_face) as FacePassCameraLayout
+
+
             consumerListener?.onCreateFacePreviewView(
                 fpcFace!!.facePreviewFace,
                 fpcFace!!.irPreviewFace
             )
+
 //        ivCameraOverLayer = findViewById(R.id.iv_camera_over_layer);
 //        ivSuccessHeader = findViewById(R.id.ivSuccessHeader);
 //        cameraPreview = findViewById(R.id.cameraPreview)
@@ -238,7 +233,7 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
             mFeedFrameThread = FeedFrameThread()
             mFeedFrameThread!!.start()
         } catch (e: Throwable) {
-            e.printStackTrace()
+            Log.e("TAG", "limeException 236: " + e.message)
         }
     }
 
@@ -253,7 +248,7 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
             mFeedFrameThread = null
             clearFacePassQueueCache()
         } catch (e: Throwable) {
-            e.printStackTrace()
+            Log.e("TAG", "limeException 251: " + e.message)
         }
     }
 
@@ -269,7 +264,7 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
         try {
             super.show()
         } catch (e: Throwable) {
-            e.printStackTrace()
+            Log.e("TAG", "limeException 267: " + e.message)
             Log.d(TAG,"limescreen 259 副屏初始化失败" + e.message)
         }
     }
@@ -984,7 +979,7 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
                 tvTime.text = "${split[1]} ${split[2]}"
             }
         } catch (e: Throwable) {
-            e.printStackTrace()
+            Log.e("TAG", "limeException 982: " + e.message)
         }
     }
 
@@ -1205,12 +1200,12 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
                 processFacePassFailRetryDelay(-1)
             }
         })
-        Schedulers.io().scheduleDirect {
+        GlobalScope.launch {
             try {
                 cbgCameraHelper?.prepareFacePassDetect()
                 cbgCameraHelper?.startFacePassDetect()
             } catch (e: Throwable) {
-                e.printStackTrace()
+                Log.e("TAG", "limeException 1208: " + e.message)
             }
         }
     }

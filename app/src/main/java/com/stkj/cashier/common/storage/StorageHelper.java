@@ -237,7 +237,7 @@ public class StorageHelper {
                             emitter.onNext(publicDirFile);
                             emitter.onComplete();
                         } catch (Throwable e) {
-                            e.printStackTrace();
+                            Log.e("TAG", "limeException 240: " + e.getMessage());
                             emitter.onError(e);
                         }
                     }
@@ -269,7 +269,7 @@ public class StorageHelper {
                             emitter.onNext(publicDirFile);
                             emitter.onComplete();
                         } catch (Throwable e) {
-                            e.printStackTrace();
+                            Log.e("TAG", "limeException 272: " + e.getMessage());
                             emitter.onError(e);
                         }
                     }
@@ -301,7 +301,7 @@ public class StorageHelper {
                             emitter.onNext(publicDirFile);
                             emitter.onComplete();
                         } catch (Throwable e) {
-                            e.printStackTrace();
+                            Log.e("TAG", "limeException 304: " + e.getMessage());
                             emitter.onError(e);
                         }
                     }
@@ -441,7 +441,7 @@ public class StorageHelper {
                                 }
                                 emitter.onNext(cacheFileInfoList);
                             } catch (Throwable e) {
-                                e.printStackTrace();
+                                Log.e("TAG", "limeException 444: " + e.getMessage());
                                 //delete all cache files
                                 try {
                                     cacheFile.delete();
@@ -450,7 +450,7 @@ public class StorageHelper {
                                         file.delete();
                                     }
                                 } catch (Throwable delError) {
-                                    e.printStackTrace();
+                                    Log.e("TAG", "limeException 453: " + e.getMessage());
                                 }
                                 emitter.onError(e);
                             }

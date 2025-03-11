@@ -1,12 +1,12 @@
 package com.stkj.cashier.app.splash
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.text.TextUtils
 import android.util.Log
 import android.view.View
@@ -14,21 +14,18 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.stkj.cashier.util.util.*
 import com.google.gson.Gson
 import com.permissionx.guolindev.PermissionX
 import com.stkj.cashier.App
 import com.stkj.cashier.R
 import com.stkj.cashier.app.base.BaseActivity
 import com.stkj.cashier.app.main.MainActivity
-import com.stkj.cashier.bean.MessageEventBean
-import com.stkj.cashier.config.MessageEventType
 import com.stkj.cashier.constants.Constants
 import com.stkj.cashier.databinding.SplashActivityBinding
-import com.stkj.cashier.util.AdbCommandExecutor
 import com.stkj.cashier.util.FileCertUtil
-import com.stkj.cashier.util.camera.FacePassCameraType
+import com.stkj.cashier.util.util.EncryptUtils
+import com.stkj.cashier.util.util.LogUtils
+import com.stkj.cashier.util.util.Utils
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
@@ -39,10 +36,6 @@ import mcv.facepass.FacePassException
 import mcv.facepass.FacePassHandler
 import mcv.facepass.auth.AuthApi.AuthApplyResponse
 import mcv.facepass.auth.AuthApi.ErrorCodeConfig
-import mcv.facepass.types.FacePassConfig
-import mcv.facepass.types.FacePassModel
-import mcv.facepass.types.FacePassPose
-import org.greenrobot.eventbus.EventBus
 import java.util.concurrent.TimeUnit
 
 
@@ -149,7 +142,6 @@ class SplashActivity : BaseActivity<SplashViewModel, SplashActivityBinding>() {
 //                                App.mFacePassHandler!!.setAddFaceConfig(addFaceConfig)
 //                                createGroupStatic()
 //                            } catch (e: Throwable) {
-//                                e.printStackTrace()
 //                                Log.i("FacePassHandler", "FacePassHandler is null")
 //                                return
 //                            }
@@ -159,7 +151,6 @@ class SplashActivity : BaseActivity<SplashViewModel, SplashActivityBinding>() {
 //                            /* 如果SDK初始化未完成则需等待 */
 //                            sleep(500)
 //                        } catch (e: InterruptedException) {
-//                            e.printStackTrace()
 //                        }
 //                    }
 //                }
@@ -178,7 +169,7 @@ class SplashActivity : BaseActivity<SplashViewModel, SplashActivityBinding>() {
                 }
 
             } catch (e: FacePassException) {
-                e.printStackTrace()
+                Log.e("TAG", "limeException 172: " + e.message)
             }
         }
 
@@ -250,13 +241,13 @@ class SplashActivity : BaseActivity<SplashViewModel, SplashActivityBinding>() {
 //        SPUtils.getInstance().put(Constants.FACE_ADDRESS, "http://101.43.252.67:9003")
 //        SPUtils.getInstance().put(Constants.FACE_ADDRESS, "http://101.42.54.44:9003")
         super.onCreate(savedInstanceState)
-        sendLocalBroadcast("android.intent.action.systemui","status_bar","dismiss");
-        sendLocalBroadcast("android.intent.action.systemui","navigation_bar","dismiss");
-        sendLocalBroadcast("android.intent.action.systemui","statusbar_drop","off");
-        sendLocalBroadcast("android.intent.action.systemui","setting_button","off");
+//        sendLocalBroadcast("android.intent.action.systemui","status_bar","dismiss");
+//        sendLocalBroadcast("android.intent.action.systemui","navigation_bar","dismiss");
+//        sendLocalBroadcast("android.intent.action.systemui","statusbar_drop","off");
+//        sendLocalBroadcast("android.intent.action.systemui","setting_button","off");
 
         //sendLocalBroadcast("android.intent.action.launcher","application","com.stkj.cashier/com.stkj.cashier.app.splash.SplashActivity");
-
+        requestPermission()
 
     }
     override fun initData(savedInstanceState: Bundle?) {
@@ -337,6 +328,7 @@ class SplashActivity : BaseActivity<SplashViewModel, SplashActivityBinding>() {
         }
     }
 
+    @SuppressLint("AutoDispose", "CheckResult")
     private fun startAnimation(view: View) {
         val anim = AnimationUtils.loadAnimation(context, R.anim.splash_anim)
         anim.setAnimationListener(object : Animation.AnimationListener {
@@ -393,7 +385,7 @@ class SplashActivity : BaseActivity<SplashViewModel, SplashActivityBinding>() {
                 startActivity()
             }
         } catch (e: FacePassException) {
-            e.printStackTrace()
+            Log.e("TAG", "limeException 388: " + e.message)
         }
     }
 

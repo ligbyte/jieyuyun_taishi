@@ -1,6 +1,7 @@
 package com.stkj.cashier.util;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -21,7 +22,7 @@ public class PriceUtils {
             df.setRoundingMode(RoundingMode.HALF_UP);
             result = df.format(parseDouble);
         } catch (Throwable e) {
-            e.printStackTrace();
+            Log.e("TAG", "limeException 25: " + e.getMessage());
         }
         return result;
     }
@@ -36,7 +37,7 @@ public class PriceUtils {
             df.setRoundingMode(RoundingMode.HALF_UP);
             result = df.format(price);
         } catch (Throwable e) {
-            e.printStackTrace();
+            Log.e("TAG", "limeException 40: " + e.getMessage());
         }
         return result;
     }
@@ -55,7 +56,7 @@ public class PriceUtils {
             df.setRoundingMode(RoundingMode.HALF_UP);
             result = df.format(parseDouble);
         } catch (Throwable e) {
-            e.printStackTrace();
+            Log.e("TAG", "limeException 59: " + e.getMessage());
         }
         return result;
     }
@@ -70,7 +71,7 @@ public class PriceUtils {
             df.setRoundingMode(RoundingMode.HALF_UP);
             result = df.format(price);
         } catch (Throwable e) {
-            e.printStackTrace();
+            Log.e("TAG", "limeException 74: " + e.getMessage());
         }
         return result;
     }
@@ -83,7 +84,7 @@ public class PriceUtils {
                 result = price.substring(0, indexOf) + ".00";
             }
         } catch (Throwable e) {
-            e.printStackTrace();
+            Log.e("TAG", "limeException 87: " + e.getMessage());
         }
         return result;
     }
@@ -96,7 +97,7 @@ public class PriceUtils {
                 result = price.substring(0, indexOf + 2) + "0";
             }
         } catch (Throwable e) {
-            e.printStackTrace();
+            Log.e("TAG", "limeException 100: " + e.getMessage());
         }
         return result;
     }
@@ -106,7 +107,7 @@ public class PriceUtils {
         try {
             result = Double.parseDouble(price);
         } catch (Throwable e) {
-            e.printStackTrace();
+            Log.e("TAG", "limeException 110: " + e.getMessage());
         }
         return result;
     }

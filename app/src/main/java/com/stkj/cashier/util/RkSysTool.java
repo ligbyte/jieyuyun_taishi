@@ -152,7 +152,7 @@ public class RkSysTool {
             session.commit(intentSender);
             LogUtils.e("--silenceInstallApk---success--");
         } catch (Throwable e) {
-            e.printStackTrace();
+            Log.e("TAG", "limeException 155: " + e.getMessage());
             LogUtils.e("--silenceInstallApk---error--" + e.getMessage());
         } finally {
             try {
@@ -166,7 +166,7 @@ public class RkSysTool {
                     inputStream.close();
                 }
             } catch (Throwable e) {
-                e.printStackTrace();
+                Log.e("TAG", "limeException 169: " + e.getMessage());
                 LogUtils.e("--silenceInstallApk---error--" + e.getMessage());
             }
         }
@@ -255,14 +255,14 @@ public class RkSysTool {
                 fileOutputStream.write(val.getBytes());
                 fileOutputStream.flush();
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e("TAG", "limeException 258: " + e.getMessage());
             }finally {
                 if(fileOutputStream!=null)
                 {
                     try {
                         fileOutputStream.close();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        Log.e("TAG", "limeException 265: " + e.getMessage());
                     }
                 }
             }
@@ -281,14 +281,14 @@ public class RkSysTool {
                 fileOutputStream.write(val.getBytes());
                 fileOutputStream.flush();
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e("TAG", "limeException 284: " + e.getMessage());
             }finally {
                 if(fileOutputStream!=null)
                 {
                     try {
                         fileOutputStream.close();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        Log.e("TAG", "limeException 291: " + e.getMessage());
                     }
                 }
             }

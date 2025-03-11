@@ -1,5 +1,6 @@
 package com.stkj.cashier.util.camera;
 
+import android.annotation.SuppressLint;
 import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
@@ -20,6 +21,8 @@ import java.util.List;
 
 
 public class CameraManager implements CameraPreview.CameraPreviewListener {
+    
+    public final static String TAG = "CameraManager";
     protected boolean front = false;
 
     protected Camera camera = null;
@@ -131,16 +134,19 @@ public class CameraManager implements CameraPreview.CameraPreviewListener {
             state = CameraState.OPENING;
             release();
             new AsyncTask<Object, Object, Object>() {
+                @SuppressLint("StaticFieldLeak")
                 @Override
                 protected Object doInBackground(Object... params) {
                     cameraId =  Camera.CameraInfo.CAMERA_FACING_BACK;
                     try {
+                        Log.i(TAG, "limeopenCamera openBackCamera 629------------------------------------");// attempt to get a Camera instance
                         camera = Camera.open(cameraId);
                     } catch (Exception e) {
                         Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
                         int count = Camera.getNumberOfCameras();
                         if (count > 0) {
                             cameraId = 0;
+                            Log.i(TAG, "limeopenCamera openBackCamera 629------------------------------------");// attempt to get a Camera instance
                             camera = Camera.open(cameraId);
                         } else {
                             cameraId = -1;

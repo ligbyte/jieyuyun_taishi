@@ -65,7 +65,7 @@ public final class FlashlightUtils {
                     parameters.setFlashMode(FLASH_MODE_TORCH);
                     mCamera.setParameters(parameters);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.e("TAG", "limeException 68: " + e.getMessage());
                 }
             }
         } else {
@@ -87,19 +87,19 @@ public final class FlashlightUtils {
     }
 
     private static boolean init() {
-        if (mCamera == null) {
-            try {
-                mCamera = Camera.open(0);
-                mSurfaceTexture = new SurfaceTexture(0);
-            } catch (Throwable t) {
-                Log.e("FlashlightUtils", "init failed: ", t);
-                return false;
-            }
-        }
-        if (mCamera == null) {
-            Log.e("FlashlightUtils", "init failed.");
-            return false;
-        }
+//        if (mCamera == null) {
+//            try {
+//                mCamera = Camera.open(0);
+//                mSurfaceTexture = new SurfaceTexture(0);
+//            } catch (Throwable t) {
+//                Log.e("FlashlightUtils", "init failed: ", t);
+//                return false;
+//            }
+//        }
+//        if (mCamera == null) {
+//            Log.e("FlashlightUtils", "init failed.");
+//            return false;
+//        }
         return true;
     }
 }

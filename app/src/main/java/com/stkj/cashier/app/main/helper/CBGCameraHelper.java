@@ -53,6 +53,7 @@ public class CBGCameraHelper extends ActivityWeakRefHolder {
 
     public void setPreviewView(SurfaceView surfaceView, SurfaceView irPreview, boolean isFaceDualCamera) {
         Activity activityWithCheck = getHolderActivityWithCheck();
+        Log.i(TAG, "limeopenCamera activityWithCheck 56: " + (activityWithCheck == null));
         if (activityWithCheck == null) {
             return;
         }
@@ -72,99 +73,118 @@ public class CBGCameraHelper extends ActivityWeakRefHolder {
      * 开始人脸检测
      */
     public void prepareFacePassDetect() {
-        Log.d(TAG, "limeFaceCamera prepareFacePassDetect == > : " + 73);
-        Activity activityWithCheck = getHolderActivityWithCheck();
-        if (activityWithCheck == null) {
-            return;
-        }
-        if (this.preview == null) {
-            return;
-        }
-        int cameraDisplayOrientation = DeviceManager.getInstance().getCameraDisplayOrientation();
-        if (cameraHelper == null) {
-            cameraHelper = new CameraHelper(activityWithCheck);
-            int cameraId = DeviceManager.getInstance().getBackCameraId();
-            cameraHelper.setCameraId(cameraId);
-            cameraHelper.setDisplayOrientation(cameraDisplayOrientation);
-        }
-        int irCameraDisplayOrientation = DeviceManager.getInstance().getIRCameraDisplayOrientation();
-        if (irCameraHelper == null && isFaceDualCamera) {
-            irCameraHelper = new CameraHelper(activityWithCheck);
-            int irCameraId = DeviceManager.getInstance().getIRCameraId();
-            cameraHelper.setCameraId(irCameraId);
-            irCameraHelper.setDisplayOrientation(irCameraDisplayOrientation);
-        }
-        if (cameraHelper != null) {
-            if (cameraHelper.hasPreviewView()) {
-//            cameraHelper.startPreview();
-            } else {
-                cameraHelper.setNeedPreviewCallBack(true);
-                cameraHelper.setCameraHelperCallback(new CameraHelper.OnCameraHelperCallback() {
-                    @Override
-                    public void onPreviewFrame(byte[] data, Camera camera, int displayOrientation, int previewOrientation) {
-                        try {
-                            if (!facePassHandlerHelper.isStartFrameDetectTask()) {
-                                return;
-                            }
-                            Camera.Parameters parameters = camera.getParameters();
-                            int width = parameters.getPreviewSize().width;
-                            int height = parameters.getPreviewSize().height;
-                            int orientation = DeviceManager.getInstance().needUseCameraPreviewOrientation() ? previewOrientation : displayOrientation;
-                            FacePassImage facePassImage = new FacePassImage(data, width, height, orientation, FacePassImageType.NV21);
-                            runUIThreadWithCheck(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (isFaceDualCamera) {
-                                        facePassHandlerHelper.addRgbFrame(facePassImage);
-                                    } else {
-                                        facePassHandlerHelper.addFeedFrame(facePassImage);
+        try {
+            Log.i(TAG, "limeopenCamera prepareFacePassDetect 76");
+            Activity activityWithCheck = getHolderActivityWithCheck();
+            if (activityWithCheck == null) {
+                return;
+            }
+            if (this.preview == null) {
+                return;
+            }
+            Log.i(TAG, "limeopenCamera prepareFacePassDetect 84");
+            int cameraDisplayOrientation = DeviceManager.getInstance().getCameraDisplayOrientation();
+            if (cameraHelper == null) {
+                cameraHelper = new CameraHelper(activityWithCheck);
+                int cameraId = DeviceManager.getInstance().getBackCameraId();
+                cameraHelper.setCameraId(cameraId);
+                cameraHelper.setDisplayOrientation(cameraDisplayOrientation);
+            }
+            Log.i(TAG, "limeopenCamera prepareFacePassDetect 92");
+            int irCameraDisplayOrientation = DeviceManager.getInstance().getIRCameraDisplayOrientation();
+            if (irCameraHelper == null && isFaceDualCamera) {
+                irCameraHelper = new CameraHelper(activityWithCheck);
+                int irCameraId = DeviceManager.getInstance().getIRCameraId();
+                cameraHelper.setCameraId(irCameraId);
+                irCameraHelper.setDisplayOrientation(irCameraDisplayOrientation);
+            }
+            Log.i(TAG, "limeopenCamera prepareFacePassDetect 100");
+            if (cameraHelper != null) {
+                Log.i(TAG, "limeopenCamera prepareFacePassDetect 102");
+                if (cameraHelper.hasPreviewView()) {
+            cameraHelper.startPreview();
+                    Log.i(TAG, "limeopenCamera prepareFacePassDetect 106");
+                } else {
+                    Log.i(TAG, "limeopenCamera prepareFacePassDetect 108");
+                    cameraHelper.setNeedPreviewCallBack(true);
+                    Log.i(TAG, "limeopenCamera prepareFacePassDetect 110");
+                    cameraHelper.setCameraHelperCallback(new CameraHelper.OnCameraHelperCallback() {
+                        @Override
+                        public void onPreviewFrame(byte[] data, Camera camera, int displayOrientation, int previewOrientation) {
+                            try {
+                                Log.i(TAG, "limeopenCamera prepareFacePassDetect 114");
+                                if (!facePassHandlerHelper.isStartFrameDetectTask()) {
+                                    return;
+                                }
+                                Log.i(TAG, "limeopenCamera prepareFacePassDetect 117");
+                                Camera.Parameters parameters = camera.getParameters();
+                                int width = parameters.getPreviewSize().width;
+                                int height = parameters.getPreviewSize().height;
+                                int orientation = DeviceManager.getInstance().needUseCameraPreviewOrientation() ? previewOrientation : displayOrientation;
+                                FacePassImage facePassImage = new FacePassImage(data, width, height, orientation, FacePassImageType.NV21);
+                                runUIThreadWithCheck(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (isFaceDualCamera) {
+                                            facePassHandlerHelper.addRgbFrame(facePassImage);
+                                        } else {
+                                            facePassHandlerHelper.addFeedFrame(facePassImage);
+                                        }
                                     }
-                                }
-                            });
-                        } catch (Throwable e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-                cameraHelper.prepare(preview);
-            }
-        }
-        //双目识别
-        if (irPreview != null && irCameraHelper != null) {
-            if (irCameraHelper.hasPreviewView()) {
-//                irCameraHelper.startPreview();
-            } else {
-                irCameraHelper.setNeedPreviewCallBack(true);
-                irCameraHelper.setCameraHelperCallback(new CameraHelper.OnCameraHelperCallback() {
-                    @Override
-                    public void onPreviewFrame(byte[] data, Camera camera, int displayOrientation, int previewOrientation) {
-                        try {
-                            if (!facePassHandlerHelper.isStartFrameDetectTask()) {
-                                return;
+                                });
+                            } catch (Throwable e) {
+                                Log.e(TAG, "limeopenCamera openCameraById 134: " + e.getMessage());
                             }
-                            Camera.Parameters parameters = camera.getParameters();
-                            int width = parameters.getPreviewSize().width;
-                            int height = parameters.getPreviewSize().height;
-                            int orientation = DeviceManager.getInstance().needUseIRCameraPreviewOrientation() ? previewOrientation : displayOrientation;
-                            FacePassImage facePassImage = new FacePassImage(data, width, height, orientation, FacePassImageType.NV21);
-                            runUIThreadWithCheck(new Runnable() {
-                                @Override
-                                public void run() {
-                                    facePassHandlerHelper.addIRFrame(facePassImage);
-                                }
-                            });
-                        } catch (Throwable e) {
-                            e.printStackTrace();
                         }
-                    }
-                });
-                irCameraHelper.prepare(irPreview, true);
+                    });
+                    Log.i(TAG, "limeopenCamera prepareFacePassDetect 140");
+                    cameraHelper.prepare(preview);
+                    Log.i(TAG, "limeopenCamera prepareFacePassDetect 142");
+                }
             }
+            Log.i(TAG, "limeopenCamera prepareFacePassDetect 142");
+            //双目识别
+//            if (irPreview != null && irCameraHelper != null) {
+//                Log.i(TAG, "limeopenCamera prepareFacePassDetect 145");
+//                if (irCameraHelper.hasPreviewView()) {
+////                    irCameraHelper.startPreview();
+//                } else {
+//                    irCameraHelper.setNeedPreviewCallBack(true);
+//                    irCameraHelper.setCameraHelperCallback(new CameraHelper.OnCameraHelperCallback() {
+//                        @Override
+//                        public void onPreviewFrame(byte[] data, Camera camera, int displayOrientation, int previewOrientation) {
+//                            try {
+//                                if (!facePassHandlerHelper.isStartFrameDetectTask()) {
+//                                    return;
+//                                }
+//                                Camera.Parameters parameters = camera.getParameters();
+//                                int width = parameters.getPreviewSize().width;
+//                                int height = parameters.getPreviewSize().height;
+//                                int orientation = DeviceManager.getInstance().needUseIRCameraPreviewOrientation() ? previewOrientation : displayOrientation;
+//                                FacePassImage facePassImage = new FacePassImage(data, width, height, orientation, FacePassImageType.NV21);
+//                                runUIThreadWithCheck(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        facePassHandlerHelper.addIRFrame(facePassImage);
+//                                    }
+//                                });
+//                            } catch (Throwable e) {
+//                                Log.e(TAG, "limeopenCamera openCameraById 169: " + e.getMessage());
+//                            }
+//                        }
+//                    });
+//                    irCameraHelper.prepare(irPreview, true);
+//                }
+//            }
+            //人脸识别回调
+            if (facePassHandlerHelper != null) {
+                facePassHandlerHelper.setOnDetectFaceListener(onDetectFaceListener);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "limeopenCamera openCameraById 181: " + e.getMessage());
         }
-        //人脸识别回调
-        if (facePassHandlerHelper != null) {
-            facePassHandlerHelper.setOnDetectFaceListener(onDetectFaceListener);
-        }
+
+
     }
 
     private boolean needResumeFacePassDetect;

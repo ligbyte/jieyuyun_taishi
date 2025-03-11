@@ -3,6 +3,7 @@ package com.stkj.cashier.ui.widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.widget.FrameLayout;
@@ -22,6 +23,7 @@ import com.stkj.cashier.glide.GlideApp;
  */
 public class FacePassCameraLayout extends FrameLayout {
 
+    public final static String TAG = "FacePassCameraLayout";
     private AutoFitSurfaceView irPreviewFace;
     private AutoFitSurfaceView previewFace;
     private ImageView ivDefaultFace;
@@ -57,6 +59,7 @@ public class FacePassCameraLayout extends FrameLayout {
         } else {
             LayoutInflater.from(context).inflate(R.layout.include_face_pass_camera, this);
         }
+        Log.e(TAG, "limeopenCamera consumeLayRes 61: " + consumeLayRes);
         previewFace = (AutoFitSurfaceView) findViewById(R.id.preview_face);
         previewFace.setAutoFitSurfaceListener(new AutoFitSurfaceView.OnAutoFitSurfaceListener() {
             @Override

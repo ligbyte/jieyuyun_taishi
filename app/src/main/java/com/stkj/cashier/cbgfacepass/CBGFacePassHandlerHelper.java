@@ -87,7 +87,7 @@ public class CBGFacePassHandlerHelper extends ActivityWeakRefHolder {
             try {
                 return mFacePassHandler.getLocalGroupFaceNum(DEFAULT_FACE_PASS_GROUP);
             } catch (Throwable e) {
-                e.printStackTrace();
+                Log.e("TAG", "limeException 90: " + e.getMessage());
             }
         }
         return 0;
@@ -229,7 +229,7 @@ public class CBGFacePassHandlerHelper extends ActivityWeakRefHolder {
                                 try {
                                     framePair = takeComplexFrame();
                                 } catch (InterruptedException e) {
-                                    e.printStackTrace();
+                                    Log.e("TAG", "limeException 232: " + e.getMessage());
                                     continue;
                                 }
                                 if (frameDetectTask.get()) {
@@ -278,7 +278,7 @@ public class CBGFacePassHandlerHelper extends ActivityWeakRefHolder {
                                 }
                             }
                         } catch (Throwable e) {
-                            e.printStackTrace();
+                            Log.e("TAG", "limeException 281: " + e.getMessage());
                             Log.d(TAG,"-CBGFacePassHandlerHelper--startFeedFrameDetectTask--error-" + e.getMessage());
                         }
                     }
@@ -365,7 +365,7 @@ public class CBGFacePassHandlerHelper extends ActivityWeakRefHolder {
                                 }
                             }
                         } catch (Throwable e) {
-                            e.printStackTrace();
+                            Log.e("TAG", "limeException 368: " + e.getMessage());
                             Log.d(TAG,"-CBGFacePassHandlerHelper--startRecognizeFrameTask--error-" + e.getMessage());
                         }
                     }
@@ -492,7 +492,7 @@ public class CBGFacePassHandlerHelper extends ActivityWeakRefHolder {
                         initFacePassHandler(cbgFacePassConfig);
                     }
                 } catch (Throwable e) {
-                    e.printStackTrace();
+                    Log.e("TAG", "limeException 495: " + e.getMessage());
                     runUIThreadWithCheck(new Runnable() {
                         @Override
                         public void run() {
@@ -605,7 +605,7 @@ public class CBGFacePassHandlerHelper extends ActivityWeakRefHolder {
                     //识别参数模式赋值
                     mCbgFacePassConfig = cbgFacePassConfig;
                 } catch (Throwable e) {
-                    e.printStackTrace();
+                    Log.e("TAG", "limeException 608: " + e.getMessage());
                     runUIThreadWithCheck(new Runnable() {
                         @Override
                         public void run() {
@@ -636,7 +636,7 @@ public class CBGFacePassHandlerHelper extends ActivityWeakRefHolder {
                 Log.d(TAG,"CBGFacePassHelper " + "setCBGAddFacePassConfig success faceMinThreshold: " + cbgFacePassConfig.getAddFaceMinThreshold());
             }
         } catch (Throwable e) {
-            e.printStackTrace();
+            Log.e("TAG", "limeException 639: " + e.getMessage());
             Log.d(TAG,"CBGFacePassHelper " + "setCBGAddFacePassConfig error " + e.getMessage());
         }
     }
@@ -669,7 +669,7 @@ public class CBGFacePassHandlerHelper extends ActivityWeakRefHolder {
                 Log.d(TAG,"CBGFacePassHelper " + "setCBGFacePassConfig success faceMinThreshold: " + cbgFacePassConfig.getDetectFaceMinThreshold());
             }
         } catch (Throwable e) {
-            e.printStackTrace();
+            Log.e("TAG", "limeException 672: " + e.getMessage());
             Log.d(TAG,"CBGFacePassHelper " + "setCBGFacePassConfig error " + e.getMessage());
         }
     }
@@ -710,7 +710,7 @@ public class CBGFacePassHandlerHelper extends ActivityWeakRefHolder {
                 });
 
             } catch (Throwable e) {
-                e.printStackTrace();
+                Log.e("TAG", "limeException 713: " + e.getMessage());
                 runUIThreadWithCheck(new Runnable() {
                     @Override
                     public void run() {
@@ -759,13 +759,13 @@ public class CBGFacePassHandlerHelper extends ActivityWeakRefHolder {
             inputStream.close();
             return sb.toString();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e("TAG", "limeException 762: " + e.getMessage());
         } finally {
             if (inputStream != null) {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.e("TAG", "limeException 768: " + e.getMessage());
                 }
             }
         }
@@ -777,7 +777,7 @@ public class CBGFacePassHandlerHelper extends ActivityWeakRefHolder {
             try {
                 return mFacePassHandler.getConfig();
             } catch (Throwable e) {
-                e.printStackTrace();
+                Log.e("TAG", "limeException 780: " + e.getMessage());
             }
         }
         return null;
@@ -788,7 +788,7 @@ public class CBGFacePassHandlerHelper extends ActivityWeakRefHolder {
             try {
                 return mFacePassHandler.getAddFaceConfig();
             } catch (Throwable e) {
-                e.printStackTrace();
+                Log.e("TAG", "limeException 791: " + e.getMessage());
             }
         }
         return null;

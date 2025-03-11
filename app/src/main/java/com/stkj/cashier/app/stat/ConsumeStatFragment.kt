@@ -2,8 +2,6 @@ package com.stkj.cashier.app.stat
 
 import android.os.Bundle
 import android.util.Log
-import com.stkj.cashier.util.util.EncryptUtils
-import com.stkj.cashier.util.util.LogUtils
 import com.stkj.cashier.App
 import com.stkj.cashier.R
 import com.stkj.cashier.app.base.BaseFragment
@@ -11,6 +9,8 @@ import com.stkj.cashier.app.main.MainActivity
 import com.stkj.cashier.bean.MessageEventBean
 import com.stkj.cashier.config.MessageEventType
 import com.stkj.cashier.databinding.ConsumeStatFragmentBinding
+import com.stkj.cashier.util.util.EncryptUtils
+import com.stkj.cashier.util.util.LogUtils
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -50,7 +50,7 @@ class ConsumeStatFragment :
         currentSelectIndex = -1
         scrollNextItem()
     } catch (e: Throwable) {
-        e.printStackTrace()
+            Log.e("TAG", "limeException 53: " + e.message)
     }
     }
 

@@ -477,7 +477,7 @@ public class UpdateService extends Service {
                 }
                 // download success
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e("TAG", "limeException 480: " + e.getMessage());
                 return null;
             } finally {
                 if (httpConnection != null) {
@@ -487,14 +487,14 @@ public class UpdateService extends Service {
                     try {
                         is.close();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        Log.e("TAG", "limeException 490: " + e.getMessage());
                     }
                 }
                 if (fos != null) {
                     try {
                         fos.close();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        Log.e("TAG", "limeException 497: " + e.getMessage());
                     }
                 }
             }
@@ -711,7 +711,7 @@ public class UpdateService extends Service {
                     try {
                         context.unbindService(serviceConnection);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Log.e("TAG", "limeException 714: " + e.getMessage());
                         Log.e(TAG, "解绑失败" + e.getMessage());
                     }
                     if (listener != null) {
@@ -724,7 +724,7 @@ public class UpdateService extends Service {
                     try {
                         context.unbindService(serviceConnection);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Log.e("TAG", "limeException 727: " + e.getMessage());
                         Log.e(TAG, "解绑失败" + e.getMessage());
                     }
                     if (listener != null) {

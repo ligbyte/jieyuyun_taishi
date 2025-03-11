@@ -2,6 +2,7 @@ package com.stkj.cashier.util;
 
 import android.os.Build;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.lang.reflect.Method;
 
@@ -24,7 +25,7 @@ public class SerialNumber {
                 }
             }
         } catch (Throwable e) {
-            e.printStackTrace();
+            Log.e("TAG", "limeException 27: " + e.getMessage());
         }
         return Build.SERIAL;
     }
