@@ -42,6 +42,7 @@ public class CBGCameraHelper extends ActivityWeakRefHolder {
     private CBGFacePassHandlerHelper facePassHandlerHelper;
     private CBGFacePassHandlerHelper.OnDetectFaceListener onDetectFaceListener;
     private boolean isFaceDualCamera;
+    private AmountFragment amountFragment;
 
     public CBGCameraHelper(@NonNull Activity activity) {
         super(activity);
@@ -114,7 +115,7 @@ public class CBGCameraHelper extends ActivityWeakRefHolder {
                         public void onPreviewFrame(byte[] data, Camera camera, int displayOrientation, int previewOrientation) {
                             try {
                                 Log.i(TAG, "limeopenCamera prepareFacePassDetect 114");
-                                if (!AmountFragment.mIsPaying){
+                                if (amountFragment != null && !amountFragment.mIsPayingValue()){
                                     return;
                                 }
 //                                if (!facePassHandlerHelper.isStartFrameDetectTask()) {
@@ -204,6 +205,14 @@ public class CBGCameraHelper extends ActivityWeakRefHolder {
         }
     }
 
+    public AmountFragment getAmountFragment() {
+        return amountFragment;
+    }
+
+    public void setAmountFragment(AmountFragment amountFragment) {
+        this.amountFragment = amountFragment;
+    }
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onResumeFacePassDetect(ResumeFacePassDetect eventBus) {
         if (needResumeFacePassDetect) {
@@ -218,6 +227,7 @@ public class CBGCameraHelper extends ActivityWeakRefHolder {
      */
     public void startFacePassDetect() {
         if (facePassHandlerHelper != null) {
+            facePassHandlerHelper.clearQueue();
             facePassHandlerHelper.startFeedFrameDetectTask();
             facePassHandlerHelper.startRecognizeFrameTask();
         }

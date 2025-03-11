@@ -92,8 +92,10 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
     private var mPayErrorRetry: Disposable? = null
     private var tvAmountTextBefore = ""
     private var tvStatustextBefore = ""
+    var mIsPaying = false
     public var switchTongLianPay = false;
     public var isScanCode = false;
+
 
 
 
@@ -111,10 +113,6 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
         //return AmountFragment()
     }
 
-    companion object {
-        @JvmStatic
-        var mIsPaying = false
-    }
 
     @SuppressLint("CheckResult", "AutoDispose")
     override fun initData(savedInstanceState: Bundle?) {
@@ -2042,5 +2040,9 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
         return binding.llRefundList.visibility == View.VISIBLE
     }
 
+
+    fun mIsPayingValue():Boolean{
+        return mIsPaying
+    }
 
 }

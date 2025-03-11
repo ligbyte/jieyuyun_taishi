@@ -47,6 +47,7 @@ import com.stkj.cashier.app.base.helper.SystemEventHelper
 import com.stkj.cashier.app.base.helper.SystemEventHelper.OnSystemEventListener
 import com.stkj.cashier.app.main.callback.ConsumerListener
 import com.stkj.cashier.app.main.helper.CBGCameraHelper
+import com.stkj.cashier.app.mode.AmountFragment
 import com.stkj.cashier.app.setting.Consumption1SettingFragment
 import com.stkj.cashier.bean.CheckAppVersionBean
 import com.stkj.cashier.bean.CompanyMemberBean
@@ -1988,6 +1989,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
 //            var isFaceDualCamera = DeviceManager.getInstance().isSupportDualCamera() &&
 //                    CBGFacePassConfigMMKV.isOpenDualCamera()
             Log.e(TAG, "limeFaceCamera onCreateFacePreviewView ========================================== : " + 1994)
+            cbgCameraHelper?.amountFragment = mainFragment.amountFragment
             cbgCameraHelper?.setPreviewView(previewView, irPreview, false)
             GlobalScope.launch {
                 try {

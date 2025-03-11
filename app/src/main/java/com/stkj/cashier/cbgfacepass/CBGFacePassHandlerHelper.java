@@ -201,6 +201,9 @@ public class CBGFacePassHandlerHelper extends ActivityWeakRefHolder {
     public Pair<FacePassImage, FacePassImage> takeComplexFrame() throws InterruptedException {
         return mComplexFrameQueue.take();
     }
+
+
+
     //双目人脸帧
 
     private final AtomicBoolean frameDetectTask = new AtomicBoolean(false);
@@ -807,6 +810,14 @@ public class CBGFacePassHandlerHelper extends ActivityWeakRefHolder {
             mFacePassHandler = null;
         }
     }
+
+
+    public void clearQueue(){
+        mComplexFrameQueue.clear();
+        mFeedFrameQueue.clear();
+        mRecognizeDataQueue.clear();
+    }
+
 
     public interface OnInitFacePassListener {
         void onInitSuccess();

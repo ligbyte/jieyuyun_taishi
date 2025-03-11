@@ -1093,7 +1093,7 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
         //人脸识别成功
         clearFacePassQueueCache()
         resetFacePassRetryDelay()
-        ttsSpeak("识别成功")
+        //ttsSpeak("识别成功")
         runOnUiThread {
             tvFaceTips2.visibility = View.VISIBLE
             tvFaceTips2.text = "识别成功"
