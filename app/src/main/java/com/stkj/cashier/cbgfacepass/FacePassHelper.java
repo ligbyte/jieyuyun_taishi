@@ -112,7 +112,7 @@ public class FacePassHelper extends ActivityWeakRefHolder {
                                 emitter.onError(new Exception("无搜索结果"));
                             }
                         } catch (Throwable e) {
-                            Log.e("TAG", "limeException 115: " + e.getMessage());
+                            Log.e(TAG, "limeException 115: " + e.getMessage());
                             emitter.onError(e);
                         }
                         emitter.onComplete();
@@ -160,7 +160,7 @@ public class FacePassHelper extends ActivityWeakRefHolder {
                                 emitter.onError(new Exception("无搜索结果"));
                             }
                         } catch (Throwable e) {
-                            Log.e("TAG", "limeException 163: " + e.getMessage());
+                            Log.e(TAG, "limeException 163: " + e.getMessage());
                             emitter.onError(e);
                         }
                         emitter.onComplete();
@@ -207,7 +207,7 @@ public class FacePassHelper extends ActivityWeakRefHolder {
                                 emitter.onError(new Exception("无搜索结果"));
                             }
                         } catch (Throwable e) {
-                            Log.e("TAG", "limeException 210: " + e.getMessage());
+                            Log.e(TAG, "limeException 210: " + e.getMessage());
                             emitter.onError(e);
                         }
                         emitter.onComplete();
@@ -264,7 +264,7 @@ public class FacePassHelper extends ActivityWeakRefHolder {
                             }
                             emitter.onNext(10000);
                         } catch (Throwable e) {
-                            Log.e("TAG", "limeException 267: " + e.getMessage());
+                            Log.e(TAG, "limeException 267: " + e.getMessage());
                             emitter.onError(e);
                         }
                         emitter.onComplete();
@@ -363,7 +363,7 @@ public class FacePassHelper extends ActivityWeakRefHolder {
                             List<FacePassPeopleInfo> passPeopleInfoList = query.list();
                             emitter.onNext(passPeopleInfoList);
                         } catch (Throwable e) {
-                            Log.e("TAG", "limeException 366: " + e.getMessage());
+                            Log.e(TAG, "limeException 366: " + e.getMessage());
                             emitter.onError(e);
                         }
                     }
@@ -543,7 +543,7 @@ public class FacePassHelper extends ActivityWeakRefHolder {
                                     bitmap = futureTarget.get();
                                 } catch (Throwable e) {
                                    Log.e(TAG,"lime-facePassHelper -handleFacePassInfo--cardNumber: " + cardNumber + " load imageData error " + imageData);
-                                    Log.e("TAG", "limeException 546: " + e.getMessage());
+                                    Log.e(TAG, "limeException 546: " + e.getMessage());
                                 }
                                 Log.d(TAG,"limeaddFacePassToLocal --start-- " + 546);
                                 // TODO:验证人脸质量
@@ -654,7 +654,7 @@ public class FacePassHelper extends ActivityWeakRefHolder {
 
 
                         } catch (Throwable e) {
-                            Log.e("TAG", "limeException 657: " + e.getMessage());
+                            Log.e(TAG, "limeException 657: " + e.getMessage());
                             Log.d(TAG,"limeaddFacePassToLocal 646 " + e.getMessage());
                             Log.e(TAG,"limeFacePassHelper Throwable 634 " + e.getMessage());
                             Log.e(TAG,"lime-facePassHelper -handleFacePassInfo--cardNumber: " + cardNumber + " try catch error: " + e.getMessage());
@@ -739,7 +739,7 @@ public class FacePassHelper extends ActivityWeakRefHolder {
                             long count = daoSession.getFacePassPeopleInfoDao().count();
                             emitter.onNext(count);
                         } catch (Throwable e) {
-                            Log.e("TAG", "limeException 742: " + e.getMessage());
+                            Log.e(TAG, "limeException 742: " + e.getMessage());
                             emitter.onError(e);
                         }
                         emitter.onComplete();
@@ -803,7 +803,7 @@ public class FacePassHelper extends ActivityWeakRefHolder {
                             FacePassDateBaseMMKV.removeDepartmentList();
                             emitter.onNext(10000);
                         } catch (Throwable e) {
-                            Log.e("TAG", "limeException 806: " + e.getMessage());
+                            Log.e(TAG, "limeException 806: " + e.getMessage());
                             emitter.onError(e);
                         }
                         emitter.onComplete();
