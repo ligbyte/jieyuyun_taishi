@@ -48,6 +48,9 @@ class App : Application() {
     companion object instance {
         @JvmStatic
         var serialNumber: String = ""
+        @JvmStatic
+        var isFirst = true
+
         var BASE_URL: String = ""
         lateinit var TTS: TextToSpeech//tts语速
 //        var volumeSpeech: Float = 1f//tts语速

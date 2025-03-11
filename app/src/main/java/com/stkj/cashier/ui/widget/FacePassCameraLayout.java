@@ -13,6 +13,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.stkj.cashier.App;
 import com.stkj.cashier.R;
 import com.stkj.cashier.common.core.AppManager;
 import com.stkj.cashier.common.ui.widget.surfaceview.AutoFitSurfaceView;
@@ -91,8 +92,17 @@ public class FacePassCameraLayout extends FrameLayout {
         isPreviewFace = b;
         if (isPreviewFace) {
             //TODO: 延迟显示摄像头预览
-            ivDefaultFace.setImageResource(0);
-
+            if (App.isFirst()) {
+                previewFace.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        App.setFirst(false);
+                        ivDefaultFace.setImageResource(0);
+                    }
+                }, 3000);
+            }else {
+                ivDefaultFace.setImageResource(0);
+            }
         } else {
             ivDefaultFace.setImageResource(R.mipmap.icon_welcome_consumer);
         }

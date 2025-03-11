@@ -1998,7 +1998,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
             }
 
 
-        },1500)
+        },1000)
 
 
     }
