@@ -108,6 +108,8 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
     private var mAdapter: ConsumeRefundListAdapter? = null
     private var fpcFace: FacePassCameraLayout? = null
     private var consumerListener: ConsumerListener? = null
+    private var beforeFaceToken = "";
+    private var beforeTime:Long = 0L;
 //    private lateinit var cameraPreview: CameraPreview
 //    private var ivCameraOverLayer:ImageView? = null
 //    private var ivSuccessHeader:ImageView? = null
@@ -1100,8 +1102,17 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
             }
         }
         Log.d(TAG,"limeAmountToken  handleFacePassSuccess Full_Name: " + facePassPeopleInfo?.full_Name)
+
+
+        if (beforeFaceToken.equals(facePassPeopleInfo?.cbgFaceToken) && (System.currentTimeMillis() - beforeTime < 2000)) {
+                return
+        }
+        beforeFaceToken = facePassPeopleInfo?.cbgFaceToken ?: "";
+        beforeTime = System.currentTimeMillis();
         EventBus.getDefault()
             .post(MessageEventBean(MessageEventType.AmountToken, facePassPeopleInfo?.cbgFaceToken,facePassPeopleInfo?.card_Number))
+
+
     }
 
     protected fun handleFacePassError(canSpeakFacePassFail: Boolean, recognizeState: Int) {

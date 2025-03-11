@@ -268,6 +268,10 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
                 it.data?.payNo?.let { it1 -> getPayStatus(it1) }
             } else {
                 scanCodeCallback?.startScan()
+                if (SPUtils.getInstance().getBoolean(Constants.SWITCH_FACE_PASS_PAY, false)) {
+                    EventBus.getDefault()
+                        .post(MessageEventBean(MessageEventType.OpenFacePassPay))
+                }
                 var errorMsg = "请重新支付"
                 if (!it.message.isNullOrEmpty()) {
                     ttsSpeak(it.message!!)
