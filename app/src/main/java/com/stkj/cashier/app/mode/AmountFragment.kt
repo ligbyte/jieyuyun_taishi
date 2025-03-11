@@ -10,6 +10,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.text.TextUtils
 import android.util.Log
 import android.view.Choreographer
@@ -111,7 +112,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
     }
 
     companion object {
-        @Volatile
+        @JvmStatic
         var mIsPaying = false
     }
 
@@ -268,10 +269,14 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
                 it.data?.payNo?.let { it1 -> getPayStatus(it1) }
             } else {
                 scanCodeCallback?.startScan()
-                if (SPUtils.getInstance().getBoolean(Constants.SWITCH_FACE_PASS_PAY, false)) {
-                    EventBus.getDefault()
-                        .post(MessageEventBean(MessageEventType.OpenFacePassPay))
-                }
+
+
+                Handler().postDelayed({
+                    if (SPUtils.getInstance().getBoolean(Constants.SWITCH_FACE_PASS_PAY, false)) {
+                        EventBus.getDefault()
+                            .post(MessageEventBean(MessageEventType.OpenFacePassPay))
+                    }
+                }, 2100)
                 var errorMsg = "请重新支付"
                 if (!it.message.isNullOrEmpty()) {
                     ttsSpeak(it.message!!)
@@ -893,6 +898,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
                             return
                         }
                         refreshPayingStatus()
+                        mIsPaying = true
                         modifyBalanceByFaceToken(it,message.ext!!)
                     }
                 }

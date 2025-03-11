@@ -11,6 +11,7 @@ import androidx.fragment.app.FragmentActivity;
 
 import com.stkj.cashier.app.main.model.PauseFacePassDetect;
 import com.stkj.cashier.app.main.model.ResumeFacePassDetect;
+import com.stkj.cashier.app.mode.AmountFragment;
 import com.stkj.cashier.cbgfacepass.CBGFacePassHandlerHelper;
 import com.stkj.cashier.common.camera.CameraHelper;
 import com.stkj.cashier.common.core.ActivityHolderFactory;
@@ -113,6 +114,9 @@ public class CBGCameraHelper extends ActivityWeakRefHolder {
                         public void onPreviewFrame(byte[] data, Camera camera, int displayOrientation, int previewOrientation) {
                             try {
                                 Log.i(TAG, "limeopenCamera prepareFacePassDetect 114");
+                                if (!AmountFragment.mIsPaying){
+                                    return;
+                                }
 //                                if (!facePassHandlerHelper.isStartFrameDetectTask()) {
 //                                    return;
 //                                }
