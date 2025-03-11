@@ -104,9 +104,10 @@
             android:screenOrientation="landscape"
             android:theme="@style/MainSplashTheme"
             android:launchMode="singleTask"
-            tools:ignore="LockedOrientationActivity" />
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
         <activity android:name=".app.splash.ResumeActivity"
-            android:screenOrientation="landscape"/>
+            android:screenOrientation="landscape"
+            tools:ignore="DiscouragedApi" />
 
         <activity
             android:name="com.stkj.cashier.util.util.UtilsTransActivity4MainProcess"

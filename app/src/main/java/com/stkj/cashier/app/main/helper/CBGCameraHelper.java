@@ -142,7 +142,7 @@ public class CBGCameraHelper extends ActivityWeakRefHolder {
                     Log.i(TAG, "limeopenCamera prepareFacePassDetect 142");
                 }
             }
-            Log.i(TAG, "limeopenCamera prepareFacePassDetect 142");
+            Log.i(TAG, "limeopenCamera prepareFacePassDetect 145");
             //双目识别
 //            if (irPreview != null && irCameraHelper != null) {
 //                Log.i(TAG, "limeopenCamera prepareFacePassDetect 145");
