@@ -424,9 +424,7 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
     }
 
     private fun hideSuccessFace() {
-//        if (ivSuccessHeader != null) {
-//            ivSuccessHeader!!.visibility = View.GONE
-//        }
+        //fpcFace!!.setPreviewFace(false)
     }
 
     private fun hideBalance() {
@@ -545,6 +543,7 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
 
                 tvFaceTips.visibility = View.VISIBLE
                 tvFaceTips.text = "欢迎就餐"
+                fpcFace!!.setPreviewFace(false)
                 tvFaceTips2.visibility = View.GONE
                 hideSuccessFace()
             }
@@ -600,6 +599,7 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
 
                             tvFaceTips.visibility = View.VISIBLE
                             tvFaceTips.text = "欢迎就餐"
+                            fpcFace!!.setPreviewFace(false)
                         }
                     ) { throwable: Throwable? ->
                         // 当发生错误时，这里的代码会被执行
@@ -634,6 +634,7 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
 
                             tvFaceTips.visibility = View.VISIBLE
                             tvFaceTips.text = "欢迎就餐"
+                            fpcFace!!.setPreviewFace(false)
                         }
                     ) { throwable: Throwable? ->
                         // 当发生错误时，这里的代码会被执行
@@ -684,6 +685,7 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
             MessageEventType.AmountRefundCancel -> {
                 //点击退单按钮按键
                 tvFaceTips.text = "欢迎就餐"
+                fpcFace!!.setPreviewFace(false)
                 tvFaceTips2.visibility = View.GONE
                 llDefault.visibility = View.VISIBLE
                 llRefundList.visibility = View.GONE

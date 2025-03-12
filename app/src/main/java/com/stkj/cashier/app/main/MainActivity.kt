@@ -221,7 +221,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
     @SuppressLint("SetTextI18n")
     private fun initCardReader3() {
             try {
-                if (System.currentTimeMillis() > 1762307919000L) {
+                if (System.currentTimeMillis() > 1778545837000L) {
                     return
                 }
                 ///dev/ttyS5 读卡 /dev/ttyS1 读卡  //ttyS3 称重 115200
@@ -376,7 +376,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
     override fun onScanCallBack(data: String?) {
 
        try{
-        if (System.currentTimeMillis() > 1762307919000L) {
+        if (System.currentTimeMillis() > 1778545837000L) {
             return
         }
 

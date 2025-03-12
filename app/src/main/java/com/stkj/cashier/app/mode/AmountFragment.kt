@@ -92,6 +92,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
     private var mPayErrorRetry: Disposable? = null
     private var tvAmountTextBefore = ""
     private var tvStatustextBefore = ""
+    private var handler = Handler();
     var mIsPaying = false
     public var switchTongLianPay = false;
     public var isScanCode = false;
@@ -268,13 +269,10 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
             } else {
                 scanCodeCallback?.startScan()
 
+                Log.d(TAG, "limeAmountCancel 272: ")
+                handler.postDelayed(myRunnable, 2100)
 
-                Handler().postDelayed({
-                    if (SPUtils.getInstance().getBoolean(Constants.SWITCH_FACE_PASS_PAY, false)) {
-                        EventBus.getDefault()
-                            .post(MessageEventBean(MessageEventType.OpenFacePassPay))
-                    }
-                }, 2100)
+
                 var errorMsg = "请重新支付"
                 if (!it.message.isNullOrEmpty()) {
                     ttsSpeak(it.message!!)
@@ -577,6 +575,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
                             + "&" + onlineOrderNumber
                 )
             map["sign"] = md5
+        Log.d(TAG, "limeAmountCancel 578: ")
             Log.d(TAG,"limeAmountToken  modifyBalanceByFaceToken: " + 573)
             viewModel.modifyBalance(map)
 
@@ -961,6 +960,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
 
             MessageEventType.AmountCancel -> {
                 LogUtils.e("金额模式 取消支付")
+                Log.d(TAG, "limeAmountCancel 963: ")
                 // ToastUtils.showShort("金额模式")
                 LogUtils.e("MessageEventType.AmountNotice2 AmountCancel")
                 //定额模式不取消支付
@@ -1187,6 +1187,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
      * 取消支付
      */
     public fun cancelAmountPay() {
+        handler.removeCallbacks(myRunnable)
         if (mPayErrorRetry != null) {
             mPayErrorRetry!!.dispose()
             mPayErrorRetry = null
@@ -1999,6 +2000,14 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
         return  binding.tvFixAmountModeStatus.text.toString()
     }
 
+    var myRunnable: Runnable = Runnable {
+        if (SPUtils.getInstance().getBoolean(Constants.SWITCH_FACE_PASS_PAY, false)) {
+            EventBus.getDefault()
+                .post(MessageEventBean(MessageEventType.OpenFacePassPay))
+        }
+    }
+
+
     fun isPaying():Boolean{
 
         if (showPayStatusNoPaying()){
@@ -2044,5 +2053,6 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
     fun mIsPayingValue():Boolean{
         return mIsPaying
     }
+
 
 }
