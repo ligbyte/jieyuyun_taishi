@@ -221,74 +221,139 @@ public class CBGFacePassHandlerHelper extends ActivityWeakRefHolder {
             Schedulers.io().scheduleDirect(new Runnable() {
                 @Override
                 public void run() {
-                    Log.d(TAG,"-CBGFacePassHandlerHelper--startFeedFrameDetectTask--start-");
+                    Log.d(TAG, "-CBGFacePassHandlerHelper--startFeedFrameDetectTask--start-");
                     while (frameDetectTask.get()) {
                         try {
-                            /* 将每一帧FacePassImage 送入SDK算法， 并得到返回结果 */
                             FacePassDetectionResult detectionResult = null;
                             if (isFaceDualCamera()) {
-                                //双目人脸检测
                                 Pair<FacePassImage, FacePassImage> framePair;
                                 try {
                                     framePair = takeComplexFrame();
                                 } catch (InterruptedException e) {
-                                    Log.e("TAG", "limeException 232: " + e.getMessage());
-                                    continue;
+                                    continue; // Skip the current iteration on interruption
                                 }
                                 if (frameDetectTask.get()) {
                                     detectionResult = mFacePassHandler.feedFrameRGBIR(framePair.first, framePair.second);
                                 }
                             } else {
-                                //单目人脸检测
                                 detectionResult = feedFrame();
                             }
                             if (detectionResult != null && detectionResult.faceList != null && detectionResult.faceList.length > 0) {
-                                Log.d(TAG,"--CBGFacePassHandlerHelper--detectionResult--faceList >  " + detectionResult.faceList.length);
-                                /*离线模式，将识别到人脸的，message不为空的result添加到处理队列中*/
                                 if (detectionResult.message.length != 0) {
-                                    Log.d(TAG,"-CBGFacePassHandlerHelper--startFeedFrameDetectTask--detectionResult-RecognizeDataQueue.offer");
-                                    /*送识别的人脸框的属性信息*/
+                                    // 获取默认人脸识别参数
+                                    float searchThreshold = mCbgFacePassConfig != null ? mCbgFacePassConfig.getSearchThreshold() : 75f;
+                                    float livenessThreshold = mCbgFacePassConfig != null ? mCbgFacePassConfig.getLivenessThreshold() : 80f;
+                                    float livenessGaThreshold = mCbgFacePassConfig != null ? mCbgFacePassConfig.getLivenessGaThreshold() : 85f;
+
+                                    // 创建 FacePassTrackOptions 数组
                                     FacePassTrackOptions[] trackOpts = new FacePassTrackOptions[detectionResult.images.length];
-                                    //获取默认人脸识别参数
-                                    float searchThreshold = 75f;
-                                    float livenessThreshold = 80f; // -1.0f will not change the liveness threshold
-                                    float livenessGaThreshold = 85f;
-                                    if (mCbgFacePassConfig != null) {
-                                        searchThreshold = mCbgFacePassConfig.getSearchThreshold();
-                                        livenessThreshold = mCbgFacePassConfig.getLivenessThreshold();
-                                        livenessGaThreshold = mCbgFacePassConfig.getLivenessGaThreshold();
-                                    }
                                     for (int i = 0; i < detectionResult.images.length; ++i) {
                                         if (detectionResult.images[i].rcAttr.respiratorType != FacePassRCAttribute.FacePassRespiratorType.INVALID
                                                 && detectionResult.images[i].rcAttr.respiratorType != FacePassRCAttribute.FacePassRespiratorType.NO_RESPIRATOR) {
                                             trackOpts[i] = new FacePassTrackOptions(detectionResult.images[i].trackId, searchThreshold, livenessThreshold, livenessGaThreshold, -1.0f);
                                         }
                                     }
+
                                     RecognizeData mRecData = new RecognizeData(detectionResult.message, trackOpts);
                                     mRecognizeDataQueue.offer(mRecData);
+
                                     if (onDetectFaceListener != null) {
                                         int faceCount = detectionResult.faceList.length;
-                                        runUIThreadWithCheck(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                if (onDetectFaceListener != null) {
-                                                    Log.d(TAG,"--CBGFacePassHandlerHelper-onDetectFace--count: " + faceCount);
-                                                    onDetectFaceListener.onDetectFace(faceCount);
-                                                }
+                                        runUIThreadWithCheck(() -> {
+                                            if (onDetectFaceListener != null) {
+                                                onDetectFaceListener.onDetectFace(faceCount);
                                             }
                                         });
                                     }
                                 }
                             }
                         } catch (Throwable e) {
-                            Log.e("TAG", "limeException 281: " + e.getMessage());
-                            Log.d(TAG,"-CBGFacePassHandlerHelper--startFeedFrameDetectTask--error-" + e.getMessage());
+                            Log.e(TAG, "Error in startFeedFrameDetectTask: " + e.getMessage());
                         }
                     }
                 }
             });
         }
     }
+
+
+//    public void startFeedFrameDetectTask() {
+//        if (mFacePassHandler != null) {
+//            if (frameDetectTask.get()) {
+//                return;
+//            }
+//            frameDetectTask.set(true);
+//            Schedulers.io().scheduleDirect(new Runnable() {
+//                @Override
+//                public void run() {
+//                    Log.d(TAG,"-CBGFacePassHandlerHelper--startFeedFrameDetectTask--start-");
+//                    while (frameDetectTask.get()) {
+//                        try {
+//                            /* 将每一帧FacePassImage 送入SDK算法， 并得到返回结果 */
+//                            FacePassDetectionResult detectionResult = null;
+//                            if (isFaceDualCamera()) {
+//                                //双目人脸检测
+//                                Pair<FacePassImage, FacePassImage> framePair;
+//                                try {
+//                                    framePair = takeComplexFrame();
+//                                } catch (InterruptedException e) {
+//                                    Log.e("TAG", "limeException 232: " + e.getMessage());
+//                                    continue;
+//                                }
+//                                if (frameDetectTask.get()) {
+//                                    detectionResult = mFacePassHandler.feedFrameRGBIR(framePair.first, framePair.second);
+//                                }
+//                            } else {
+//                                //单目人脸检测
+//                                detectionResult = feedFrame();
+//                            }
+//                            if (detectionResult != null && detectionResult.faceList != null && detectionResult.faceList.length > 0) {
+//                                Log.d(TAG,"--CBGFacePassHandlerHelper--detectionResult--faceList >  " + detectionResult.faceList.length);
+//                                /*离线模式，将识别到人脸的，message不为空的result添加到处理队列中*/
+//                                if (detectionResult.message.length != 0) {
+//                                    Log.d(TAG,"-CBGFacePassHandlerHelper--startFeedFrameDetectTask--detectionResult-RecognizeDataQueue.offer");
+//                                    /*送识别的人脸框的属性信息*/
+//                                    FacePassTrackOptions[] trackOpts = new FacePassTrackOptions[detectionResult.images.length];
+//                                    //获取默认人脸识别参数
+//                                    float searchThreshold = 75f;
+//                                    float livenessThreshold = 80f; // -1.0f will not change the liveness threshold
+//                                    float livenessGaThreshold = 85f;
+//                                    if (mCbgFacePassConfig != null) {
+//                                        searchThreshold = mCbgFacePassConfig.getSearchThreshold();
+//                                        livenessThreshold = mCbgFacePassConfig.getLivenessThreshold();
+//                                        livenessGaThreshold = mCbgFacePassConfig.getLivenessGaThreshold();
+//                                    }
+//                                    for (int i = 0; i < detectionResult.images.length; ++i) {
+//                                        if (detectionResult.images[i].rcAttr.respiratorType != FacePassRCAttribute.FacePassRespiratorType.INVALID
+//                                                && detectionResult.images[i].rcAttr.respiratorType != FacePassRCAttribute.FacePassRespiratorType.NO_RESPIRATOR) {
+//                                            trackOpts[i] = new FacePassTrackOptions(detectionResult.images[i].trackId, searchThreshold, livenessThreshold, livenessGaThreshold, -1.0f);
+//                                        }
+//                                    }
+//                                    RecognizeData mRecData = new RecognizeData(detectionResult.message, trackOpts);
+//                                    mRecognizeDataQueue.offer(mRecData);
+//                                    if (onDetectFaceListener != null) {
+//                                        int faceCount = detectionResult.faceList.length;
+//                                        runUIThreadWithCheck(new Runnable() {
+//                                            @Override
+//                                            public void run() {
+//                                                if (onDetectFaceListener != null) {
+//                                                    Log.d(TAG,"--CBGFacePassHandlerHelper-onDetectFace--count: " + faceCount);
+//                                                    onDetectFaceListener.onDetectFace(faceCount);
+//                                                }
+//                                            }
+//                                        });
+//                                    }
+//                                }
+//                            }
+//                        } catch (Throwable e) {
+//                            Log.e("TAG", "limeException 281: " + e.getMessage());
+//                            Log.d(TAG,"-CBGFacePassHandlerHelper--startFeedFrameDetectTask--error-" + e.getMessage());
+//                        }
+//                    }
+//                }
+//            });
+//        }
+//    }
 
     public void stopFeedFrameDetectTask() {
         rgbFrameBuffer = null;
@@ -304,18 +369,17 @@ public class CBGFacePassHandlerHelper extends ActivityWeakRefHolder {
 
     private final AtomicBoolean recognizeFrameTask = new AtomicBoolean(false);
 
+
     public void startRecognizeFrameTask() {
-        Log.i(TAG, "limeprocessFacePassResult startRecognizeFrameTask 305 ");
         if (mFacePassHandler != null) {
             if (recognizeFrameTask.get()) {
                 return;
             }
-            Log.i(TAG, "limeprocessFacePassResult startRecognizeFrameTask 310 ");
             recognizeFrameTask.set(true);
             Schedulers.io().scheduleDirect(new Runnable() {
                 @Override
                 public void run() {
-                    Log.d(TAG,"-CBGFacePassHandlerHelper--startRecognizeFrameTask--start-");
+                    Log.d(TAG, "-CBGFacePassHandlerHelper--startRecognizeFrameTask--start-");
                     while (recognizeFrameTask.get()) {
                         try {
                             RecognizeData recognizeData = mRecognizeDataQueue.take();
@@ -324,62 +388,127 @@ public class CBGFacePassHandlerHelper extends ActivityWeakRefHolder {
                                 if (recognizeFrameTask.get()) {
                                     recognizeResultArray = mFacePassHandler.recognize(DEFAULT_FACE_PASS_GROUP, recognizeData.message, recognizeData.trackOpt);
                                 }
-                                Log.d(TAG,"--CBGFacePassHandlerHelper-startRecognizeFrameTask--recognizeResultArray = " + (recognizeResultArray == null ? "null" : recognizeResultArray.length));
                                 if (recognizeResultArray != null && recognizeResultArray.length > 0) {
-                                    List<CBGFacePassRecognizeResult> faceTokenList = new ArrayList<>();
+                                    List<CBGFacePassRecognizeResult> faceTokenList = new ArrayList<>(recognizeResultArray.length);
+                                    int resultSearchScoreThreshold = mCbgFacePassConfig != null ? mCbgFacePassConfig.getResultSearchScoreThreshold() : 75;
+
                                     for (FacePassRecognitionResult recognizeResult : recognizeResultArray) {
-                                        if (recognizeResult != null) {
-                                            int resultSearchScoreThreshold = 75;
-                                            if (mCbgFacePassConfig != null) {
-                                                resultSearchScoreThreshold = mCbgFacePassConfig.getResultSearchScoreThreshold();
-                                            }
-                                            //判断人脸相似程度 >=75表示成功 否侧失败处理
-                                            if (recognizeResult.detail != null && recognizeResult.detail.searchScore < resultSearchScoreThreshold) {
-                                                continue;
-                                            }
+                                        if (recognizeResult != null && recognizeResult.detail != null && recognizeResult.detail.searchScore >= resultSearchScoreThreshold) {
                                             String faceToken = new String(recognizeResult.faceToken, StandardCharsets.ISO_8859_1);
                                             if (!TextUtils.isEmpty(faceToken)) {
                                                 boolean passSuccess = FacePassRecognitionState.RECOGNITION_PASS == recognizeResult.recognitionState;
                                                 CBGFacePassRecognizeResult facePassRecognizeResult = new CBGFacePassRecognizeResult(faceToken, passSuccess, recognizeResult.recognitionState);
                                                 faceTokenList.add(facePassRecognizeResult);
                                             }
-                                            Log.d(TAG,"--CBGFacePassHandlerHelper-startRecognizeFrameTask--recognizeResult faceToken = " + faceToken + " recognitionState=" + recognizeResult.recognitionState);
                                         }
                                     }
-                                    Log.i(TAG, "limeprocessFacePassResult startRecognizeFrameTask 347 faceTokenList.isEmpty(): " + faceTokenList.isEmpty());
+
                                     if (!faceTokenList.isEmpty()) {
-                                        Log.d(TAG,"--CBGFacePassHandlerHelper-stopFacePass-faceTokenList:" + faceTokenList.size());
-                                        runUIThreadWithCheck(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                Log.i(TAG, "limeprocessFacePassResult startRecognizeFrameTask 349  onDetectFaceListener != null: " + (onDetectFaceListener != null));
-                                                if (onDetectFaceListener != null) {
-                                                    onDetectFaceListener.onDetectFaceToken(faceTokenList);
-                                                }
+                                        runUIThreadWithCheck(() -> {
+                                            if (onDetectFaceListener != null) {
+                                                onDetectFaceListener.onDetectFaceToken(faceTokenList);
+                                            }
+                                        });
+                                    } else {
+                                        runUIThreadWithCheck(() -> {
+                                            if (onDetectFaceListener != null) {
+                                                onDetectFaceListener.onNoDetectFaceToken();
                                             }
                                         });
                                     }
                                 } else {
-                                    Log.d(TAG,"--CBGFacePassHandlerHelper-startRecognizeFrameTask--recognizeResult onNoDetectFaceToken");
-                                    runUIThreadWithCheck(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            if (onDetectFaceListener != null) {
-                                                onDetectFaceListener.onNoDetectFaceToken();
-                                            }
+                                    runUIThreadWithCheck(() -> {
+                                        if (onDetectFaceListener != null) {
+                                            onDetectFaceListener.onNoDetectFaceToken();
                                         }
                                     });
                                 }
                             }
                         } catch (Throwable e) {
-                            Log.e("TAG", "limeException 368: " + e.getMessage());
-                            Log.d(TAG,"-CBGFacePassHandlerHelper--startRecognizeFrameTask--error-" + e.getMessage());
+                            Log.e(TAG, "Error in startRecognizeFrameTask: " + e.getMessage());
                         }
                     }
                 }
             });
         }
     }
+
+//    public void startRecognizeFrameTask() {
+//        Log.i(TAG, "limeprocessFacePassResult startRecognizeFrameTask 305 ");
+//        if (mFacePassHandler != null) {
+//            if (recognizeFrameTask.get()) {
+//                return;
+//            }
+//            Log.i(TAG, "limeprocessFacePassResult startRecognizeFrameTask 310 ");
+//            recognizeFrameTask.set(true);
+//            Schedulers.io().scheduleDirect(new Runnable() {
+//                @Override
+//                public void run() {
+//                    Log.d(TAG,"-CBGFacePassHandlerHelper--startRecognizeFrameTask--start-");
+//                    while (recognizeFrameTask.get()) {
+//                        try {
+//                            RecognizeData recognizeData = mRecognizeDataQueue.take();
+//                            if (recognizeData != null) {
+//                                FacePassRecognitionResult[] recognizeResultArray = null;
+//                                if (recognizeFrameTask.get()) {
+//                                    recognizeResultArray = mFacePassHandler.recognize(DEFAULT_FACE_PASS_GROUP, recognizeData.message, recognizeData.trackOpt);
+//                                }
+//                                Log.d(TAG,"--CBGFacePassHandlerHelper-startRecognizeFrameTask--recognizeResultArray = " + (recognizeResultArray == null ? "null" : recognizeResultArray.length));
+//                                if (recognizeResultArray != null && recognizeResultArray.length > 0) {
+//                                    List<CBGFacePassRecognizeResult> faceTokenList = new ArrayList<>();
+//                                    for (FacePassRecognitionResult recognizeResult : recognizeResultArray) {
+//                                        if (recognizeResult != null) {
+//                                            int resultSearchScoreThreshold = 75;
+//                                            if (mCbgFacePassConfig != null) {
+//                                                resultSearchScoreThreshold = mCbgFacePassConfig.getResultSearchScoreThreshold();
+//                                            }
+//                                            //判断人脸相似程度 >=75表示成功 否侧失败处理
+//                                            if (recognizeResult.detail != null && recognizeResult.detail.searchScore < resultSearchScoreThreshold) {
+//                                                continue;
+//                                            }
+//                                            String faceToken = new String(recognizeResult.faceToken, StandardCharsets.ISO_8859_1);
+//                                            if (!TextUtils.isEmpty(faceToken)) {
+//                                                boolean passSuccess = FacePassRecognitionState.RECOGNITION_PASS == recognizeResult.recognitionState;
+//                                                CBGFacePassRecognizeResult facePassRecognizeResult = new CBGFacePassRecognizeResult(faceToken, passSuccess, recognizeResult.recognitionState);
+//                                                faceTokenList.add(facePassRecognizeResult);
+//                                            }
+//                                            Log.d(TAG,"--CBGFacePassHandlerHelper-startRecognizeFrameTask--recognizeResult faceToken = " + faceToken + " recognitionState=" + recognizeResult.recognitionState);
+//                                        }
+//                                    }
+//                                    Log.i(TAG, "limeprocessFacePassResult startRecognizeFrameTask 347 faceTokenList.isEmpty(): " + faceTokenList.isEmpty());
+//                                    if (!faceTokenList.isEmpty()) {
+//                                        Log.d(TAG,"--CBGFacePassHandlerHelper-stopFacePass-faceTokenList:" + faceTokenList.size());
+//                                        runUIThreadWithCheck(new Runnable() {
+//                                            @Override
+//                                            public void run() {
+//                                                Log.i(TAG, "limeprocessFacePassResult startRecognizeFrameTask 349  onDetectFaceListener != null: " + (onDetectFaceListener != null));
+//                                                if (onDetectFaceListener != null) {
+//                                                    onDetectFaceListener.onDetectFaceToken(faceTokenList);
+//                                                }
+//                                            }
+//                                        });
+//                                    }
+//                                } else {
+//                                    Log.d(TAG,"--CBGFacePassHandlerHelper-startRecognizeFrameTask--recognizeResult onNoDetectFaceToken");
+//                                    runUIThreadWithCheck(new Runnable() {
+//                                        @Override
+//                                        public void run() {
+//                                            if (onDetectFaceListener != null) {
+//                                                onDetectFaceListener.onNoDetectFaceToken();
+//                                            }
+//                                        }
+//                                    });
+//                                }
+//                            }
+//                        } catch (Throwable e) {
+//                            Log.e("TAG", "limeException 368: " + e.getMessage());
+//                            Log.d(TAG,"-CBGFacePassHandlerHelper--startRecognizeFrameTask--error-" + e.getMessage());
+//                        }
+//                    }
+//                }
+//            });
+//        }
+//    }
 
     public void stopRecognizeFrameTask() {
         mRecognizeDataQueue.clear();

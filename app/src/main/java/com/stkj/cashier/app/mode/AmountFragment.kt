@@ -270,7 +270,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
                 scanCodeCallback?.startScan()
 
                 Log.d(TAG, "limeAmountCancel 272: ")
-                handler.postDelayed(myRunnable, 2100)
+                handler.postDelayed(myRunnable, 3000)
 
 
                 var errorMsg = "请重新支付"
