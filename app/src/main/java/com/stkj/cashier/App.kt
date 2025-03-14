@@ -82,11 +82,12 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        if (BuildConfig.envType == 0) {
-            BASE_URL = Constants.BASE_OFFICIAL_URL
-        } else {
-            BASE_URL = Constants.BASE_TEST_URL
-        }
+//        if (BuildConfig.envType == 0) {
+//            BASE_URL = Constants.BASE_OFFICIAL_URL
+//        } else {
+//            BASE_URL = Constants.BASE_OFFICIAL_URL
+//        }
+        BASE_URL = Constants.BASE_OFFICIAL_URL
         AppManager.INSTANCE.init(this)
 
         //初始化设备
