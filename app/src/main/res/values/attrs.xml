@@ -167,7 +167,7 @@
     </declare-styleable>
 
     <declare-styleable name="RatioLinearLayout">
-        <attr name="ratio_w_h_1" format="float" />
+        <attr name="ratio_w_h_e" format="float" />
     </declare-styleable>
 
     <declare-styleable name="CountDownProgressBar">
