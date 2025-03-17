@@ -681,7 +681,13 @@ public class CBGFacePassHandlerHelper extends ActivityWeakRefHolder {
                     //config.ageGenderModel = FacePassModel.initModel(assets, "attr.age_gender.arm.190630.bin");
 
                     /* 识别阈值参数 */
-                    config.rcAttributeAndOcclusionMode = cbgFacePassConfig.isOcclusionMode() ? 1 : 0;
+                    /**
+                     * 遮挡和属性模式，默认使用模式0。
+                     * 一共有5种模式可以选择，{0，1，2，3，4}，五选一，默认是模式0
+                     * 其中入库的模式只有0和2两种，即0：遮挡允许入库，2：遮挡不允许入库！
+                     */
+                    config.rcAttributeAndOcclusionMode = cbgFacePassConfig.isOcclusionMode() ? 0 : 2;
+
                     config.searchThreshold = cbgFacePassConfig.getSearchThreshold();
                     config.livenessThreshold = cbgFacePassConfig.getLivenessThreshold();
                     config.livenessGaThreshold = cbgFacePassConfig.getLivenessGaThreshold();

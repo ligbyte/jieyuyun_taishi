@@ -50,6 +50,7 @@ import com.stkj.cashier.util.util.NetworkUtils
 import com.stkj.cashier.util.util.SPUtils
 import com.stkj.cashier.util.util.SpanUtils
 import com.stkj.cashier.util.util.ToastUtils
+import com.wind.dialogtiplib.dialog_tip.TipLoadDialog
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
@@ -92,6 +93,7 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
     private var mPayErrorRetry: Disposable? = null
     private var tvAmountTextBefore = ""
     private var tvStatustextBefore = ""
+    private var tipLoadDialog: TipLoadDialog? = null
     private var handler = Handler();
     var mIsPaying = false
     public var switchTongLianPay = false;
@@ -901,6 +903,14 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
                 }
             }
 
+            MessageEventType.ShowLoadingDialog -> {
+                message?.content?.let { showLoadingDialog(it,message.ext.toString()) }
+            }
+
+            MessageEventType.DismissLoadingDialog -> {
+                dismissLoadingDialog()
+            }
+
             MessageEventType.AmountCard -> {
                 message.content?.let {
                     if (mIsRefund) {
@@ -1400,6 +1410,9 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
                                 binding.tvStatus.text = "-"
                                 scanCodeCallback?.stopScan()
                                 // 下载人脸
+                                EventBus.getDefault()
+                                    .post(MessageEventBean(MessageEventType.ShowLoadingDialog, "下载人脸","Downloading"))
+
                                 var mainActivity = activity as MainActivity
 //                                Thread(Runnable {
 //                                    App.mFacePassHandler?.clearAllGroupsAndFaces()
@@ -2052,6 +2065,30 @@ class AmountFragment : BaseFragment<ModeViewModel, AmountFragment580Binding>(),
 
     fun mIsPayingValue():Boolean{
         return mIsPaying
+    }
+
+    private fun showLoadingDialog(msg: String, tag: String) {
+        activity?.runOnUiThread {
+            if (tipLoadDialog == null) {
+                tipLoadDialog = TipLoadDialog(activity)
+            }
+            if (tag == "SUCCESS") {
+                tipLoadDialog!!.setMsgAndType(msg, TipLoadDialog.ICON_TYPE_SUCCESS).show()
+            } else if (tag == "FAIL") {
+                tipLoadDialog!!.setMsgAndType(msg, TipLoadDialog.ICON_TYPE_FAIL).show()
+            } else {
+                tipLoadDialog!!.setMsgAndType(msg, TipLoadDialog.ICON_TYPE_LOADING2).show()
+            }
+        }
+    }
+
+
+    private fun dismissLoadingDialog() {
+        activity?.runOnUiThread {
+            if (tipLoadDialog != null) {
+                tipLoadDialog!!.dismiss()
+            }
+        }
     }
 
 

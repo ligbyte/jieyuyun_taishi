@@ -1,5 +1,7 @@
 package com.stkj.cashier.cbgfacepass.data;
 
+import android.util.Log;
+
 import com.stkj.cashier.cbgfacepass.model.CBGFacePassConfig;
 import com.tencent.mmkv.MMKV;
 
@@ -8,6 +10,7 @@ import com.tencent.mmkv.MMKV;
  */
 public class CBGFacePassConfigMMKV {
 
+    public final static String TAG = "CBGFacePassConfigMMKV";
     public static int DEFAULT_DETECT_FACE_LEVEL50 = 362;
     public static int DEFAULT_DETECT_FACE_LEVEL80 = 387;
     public static int DEFAULT_DETECT_FACE_LEVEL100 = 412;
@@ -31,7 +34,7 @@ public class CBGFacePassConfigMMKV {
      * 其中入库的模式只有0和2两种，即0：遮挡允许入库，2：遮挡不允许入库！
      */
     public static boolean getOcclusionMode() {
-        return getFacePassMMKV().getBoolean("occlusionMode", true);
+        return getFacePassMMKV().getBoolean("occlusionMode", false);
     }
 
     public static void putOcclusionMode(boolean enable) {
@@ -213,6 +216,20 @@ public class CBGFacePassConfigMMKV {
         cbgFacePassConfig.setPoseThreshold(getPoseThreshold());
         //识别结果分数
         cbgFacePassConfig.setResultSearchScoreThreshold(getResultSearchScoreThreshold());
+
+        Log.d(TAG, "limegetFacePassConfig " +
+                "  getLivenessEnabled(): " + getLivenessEnabled() +
+                "  getOcclusionMode(): " + getOcclusionMode() +
+                "  getGaThresholdEnabled(): " + getGaThresholdEnabled() +
+                "  getSearchThreshold(): " + getSearchThreshold() +
+                "  getLivenessThreshold(): " + getLivenessThreshold() +
+                "  getGaThreshold(): " + getGaThreshold() +
+                "  getDetectFaceMinThreshold(): " + getDetectFaceMinThreshold() +
+                "  getAddFaceMinThreshold(): " + getAddFaceMinThreshold() +
+                "  getPoseThreshold(): " + getPoseThreshold() +
+                "  getResultSearchScoreThreshold(): " + getResultSearchScoreThreshold()
+        );
+
         return cbgFacePassConfig;
     }
 

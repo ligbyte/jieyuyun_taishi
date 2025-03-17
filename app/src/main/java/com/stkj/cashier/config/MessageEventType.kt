@@ -30,6 +30,8 @@ interface MessageEventType {
         const val PickUpNotice4 = 1085//忽略后不够数量的人脸
         const val CompanyName = 1090
 
+        const val ShowLoadingDialog = 3000
+        const val DismissLoadingDialog = 3001
 
         const val HeadBeat = 1120
         const val AmountSuccess = 1130

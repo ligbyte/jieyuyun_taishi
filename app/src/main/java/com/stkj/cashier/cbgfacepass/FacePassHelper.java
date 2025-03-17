@@ -10,12 +10,14 @@ import androidx.annotation.NonNull;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.FutureTarget;
 import com.stkj.cashier.App;
+import com.stkj.cashier.bean.MessageEventBean;
 import com.stkj.cashier.cbgfacepass.model.BaseNetResponse;
 import com.stkj.cashier.cbgfacepass.net.ParamsUtils;
 import com.stkj.cashier.cbgfacepass.net.retrofit.RetrofitManager;
 import com.stkj.cashier.cbgfacepass.service.SettingService;
 import com.stkj.cashier.common.core.ActivityHolderFactory;
 import com.stkj.cashier.common.core.ActivityWeakRefHolder;
+import com.stkj.cashier.config.MessageEventType;
 import com.stkj.cashier.glide.GlideApp;
 import com.stkj.cashier.greendao.AppGreenDaoOpenHelper;
 import com.stkj.cashier.greendao.GreenDBConstants;
@@ -35,6 +37,7 @@ import com.stkj.cashier.util.util.GsonUtils;
 import com.stkj.cashier.util.util.TimeUtils;
 import com.stkj.cashier.util.util.ToastUtils;
 
+import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.greendao.database.Database;
 import org.greenrobot.greendao.query.Query;
 import org.greenrobot.greendao.query.QueryBuilder;
@@ -441,6 +444,8 @@ public class FacePassHelper extends ActivityWeakRefHolder {
                     public void onError(Throwable e) {
                         Log.e(TAG,"limeFacePassHelper 440" + e.getMessage());
                         callbackFinishFacePass(e.getMessage(), true);
+                        EventBus.getDefault()
+                                .post(new MessageEventBean(MessageEventType.ShowLoadingDialog, "下载失败","FAIL"));
                     }
                 });
     }
@@ -688,15 +693,23 @@ public class FacePassHelper extends ActivityWeakRefHolder {
                                 onFacePassListener.onGetFacePassLocalCount(addLocalFacePassInfoWrapper.getLocalDatabaseCount());
                             }
                         }
+                        Log.i(TAG,"limeaddFacePassToLocal limeisEndIndex  currentIndex: " + addLocalFacePassInfoWrapper.getCurrentIndex() + "  totalSize: "  + addLocalFacePassInfoWrapper.getTotalSize());
                         //加载成功继续请求下发(除非请求数据为空)
                         if (addLocalFacePassInfoWrapper.isEndIndex()) {
-                           Log.w(TAG,"limeFacePassHelper -addFacePassToLocal-- currentIndex: " + addLocalFacePassInfoWrapper.getCurrentIndex() + "        totalSize: " + addLocalFacePassInfoWrapper.getTotalSize());
-                            requestFacePass(1, true);
+                            EventBus.getDefault()
+                                    .post(new MessageEventBean(MessageEventType.ShowLoadingDialog, "下载成功","SUCCESS"));
+                            Log.d(TAG,"limeaddFacePassToLocal limeisEndIndex " + 693);
+                           // 0 全量下发  1 增量下发
+                           requestFacePass(1, true);
+                        }else {
+                            Log.i(TAG,"limeaddFacePassToLocal limeisEndIndex " + 697);
                         }
                     }
 
                     @Override
                     public void onError(Throwable e) {
+                        EventBus.getDefault()
+                                .post(new MessageEventBean(MessageEventType.ShowLoadingDialog, "添加人脸失败","FAIL"));
                         for (OnFacePassListener onFacePassListener : facePassListenerHashSet) {
                             onFacePassListener.onAddFacePassToLocalError(e.getMessage());
                         }
@@ -831,6 +844,8 @@ public class FacePassHelper extends ActivityWeakRefHolder {
                     public void onError(Throwable e) {
                         isDeleteAllFacePass = false;
                         ToastUtils.showLong("删除人脸库失败");
+                        EventBus.getDefault()
+                                .post(new MessageEventBean(MessageEventType.ShowLoadingDialog, "下载失败","FAIL"));
                         Log.e(TAG,"limeFacePassHelper 800");
                         if (needRequestAllFace) {
                             requestAllFacePass();

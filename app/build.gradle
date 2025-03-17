@@ -292,6 +292,7 @@ dependencies {
     implementation "com.uber.autodispose2:autodispose-android:2.1.1"
     implementation "com.uber.autodispose2:autodispose-androidx-lifecycle:2.1.1"
     implementation "com.elvishew:xlog:1.11.0"
+    implementation files('libs/lib_loadingview.aar')
 
     //camerax库
     api "androidx.camera:camera-core:1.2.0"

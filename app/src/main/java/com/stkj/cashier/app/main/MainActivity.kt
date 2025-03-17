@@ -89,6 +89,7 @@ import com.stkj.cashier.util.util.SPUtils
 import com.stkj.cashier.util.util.ScreenUtils
 import com.stkj.cashier.util.util.ToastUtils
 import com.telpo.nfc.NfcUtil
+import com.wind.dialogtiplib.dialog_tip.TipLoadDialog
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
@@ -129,6 +130,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
     val TAG = "MainActivity"
     var job: Job? = null
     private var needRestartConsumer = false
+    private var tipLoadDialog: TipLoadDialog? = null
     private var mPresentation: DifferentDisplay? = null
     private lateinit var reportDeviceStatusDisposable: Disposable
     private val fragments by lazy {
@@ -1638,6 +1640,14 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                 handlePayLogic()
             }
 
+//            MessageEventType.ShowLoadingDialog -> {
+//                message?.content?.let { showLoadingDialog(it,message.ext.toString()) }
+//            }
+//
+//            MessageEventType.DismissLoadingDialog -> {
+//                dismissLoadingDialog()
+//            }
+
             MessageEventType.OpenTongLianPayPay -> {
                 mainFragment.amountFragment.switchTongLianPay = true
             }
@@ -2015,6 +2025,30 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
         clearWeakRefHolder(CBGCameraHelper::class.java)
     }
 
+
+    private fun showLoadingDialog(msg: String, tag: String) {
+       runOnUiThread {
+            if (tipLoadDialog == null) {
+                tipLoadDialog = TipLoadDialog(MainActivity@this)
+            }
+            if (tag == "SUCCESS") {
+                tipLoadDialog!!.setMsgAndType(msg, TipLoadDialog.ICON_TYPE_SUCCESS).show()
+            } else if (tag == "FAIL") {
+                tipLoadDialog!!.setMsgAndType(msg, TipLoadDialog.ICON_TYPE_FAIL).show()
+            } else {
+                tipLoadDialog!!.setMsgAndType(msg, TipLoadDialog.ICON_TYPE_LOADING2).show()
+            }
+        }
+    }
+
+
+    private fun dismissLoadingDialog() {
+        runOnUiThread {
+            if (tipLoadDialog != null) {
+                tipLoadDialog!!.dismiss()
+            }
+        }
+    }
 
 
 
