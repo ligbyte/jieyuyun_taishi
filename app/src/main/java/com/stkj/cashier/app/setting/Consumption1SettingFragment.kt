@@ -10,6 +10,7 @@ import android.view.View
 import android.widget.TextView
 import androidx.core.view.isVisible
 import com.jakewharton.processphoenix.ProcessPhoenix
+import com.king.base.util.SystemUtils
 import com.stkj.cashier.App
 import com.stkj.cashier.BuildConfig
 import com.stkj.cashier.R
@@ -17,6 +18,8 @@ import com.stkj.cashier.app.base.BaseFragment
 import com.stkj.cashier.app.main.MainActivity
 import com.stkj.cashier.app.main.SettingViewModel
 import com.stkj.cashier.bean.MessageEventBean
+import com.stkj.cashier.cbgfacepass.FacePassHelper
+import com.stkj.cashier.cbgfacepass.data.FacePassDateBaseMMKV
 import com.stkj.cashier.config.MessageEventType
 import com.stkj.cashier.constants.Constants
 import com.stkj.cashier.databinding.Consumption1SettingFragmentBinding
@@ -24,6 +27,7 @@ import com.stkj.cashier.dict.HomeMenu
 import com.stkj.cashier.util.ShellUtils
 import com.stkj.cashier.util.util.LogUtils
 import com.stkj.cashier.util.util.SPUtils
+import com.stkj.cashier.util.util.SpanUtils
 import dagger.hilt.android.AndroidEntryPoint
 import org.greenrobot.eventbus.EventBus
 
@@ -51,6 +55,8 @@ class Consumption1SettingFragment :
         }
     }
 
+    var facePassHelper: FacePassHelper? = null;
+
     //当前页面选中状态索引
     private var currentSelectIndex = -1
 
@@ -58,7 +64,7 @@ class Consumption1SettingFragment :
     private var mPageIndex = 0
 
     //第一层页面总item数量
-    private val firstPageSelectItemCount = 6
+    private val firstPageSelectItemCount = 7
 
     //第二层页面总item数量
     private val secondPageSelectItemCount = 8
@@ -273,6 +279,8 @@ class Consumption1SettingFragment :
             binding.flShutdownDevice.background = null
             binding.flRebootDevice.background = null
             binding.flSwitchTongLianPay.background = null
+            binding.flFaceUpdate.background = null
+
             var focusView: View? = null
             when (itemIndex) {
                 0 -> {
@@ -286,21 +294,26 @@ class Consumption1SettingFragment :
                 }
 
                 2 -> {
+                    binding.flFaceUpdate.background = ColorDrawable(0x12ffffff)
+                    focusView = binding.flFaceUpdate
+                }
+
+                3 -> {
                     binding.flSwitchTongLianPay.background = ColorDrawable(0x12ffffff)
                     focusView = binding.flSwitchTongLianPay
                 }
 
-                3 -> {
+                4 -> {
                     binding.flRestartApp.background = ColorDrawable(0x12ffffff)
                     focusView = binding.flRestartApp
                 }
 
-                4 -> {
+                5 -> {
                     binding.flShutdownDevice.background = ColorDrawable(0x12ffffff)
                     focusView = binding.flShutdownDevice
                 }
 
-                5 -> {
+                6 -> {
                     binding.flRebootDevice.background = ColorDrawable(0x12ffffff)
                     focusView = binding.flRebootDevice
                 }
@@ -463,6 +476,26 @@ class Consumption1SettingFragment :
 
                             "确认" -> {
                                 if (mPageIndex == 0) {
+                                    if (binding.updateFaceConfirm.isVisible) {
+                                        binding.updateFaceConfirm.visibility = View.GONE
+                                        if (!SystemUtils.isNetWorkActive(getApp())) {
+                                            //ttsSpeak(getString(R.string.result_network_unavailable_error))
+                                            ttsSpeak("网络已断开，请检查网络。")
+                                            return
+                                        }
+                                        // 下载人脸
+                                        EventBus.getDefault()
+                                            .post(MessageEventBean(MessageEventType.ShowLoadingDialog, "下载人脸","Downloading"))
+                                        if (facePassHelper == null) {
+                                            facePassHelper = FacePassHelper(activity as MainActivity);
+                                        }
+                                        Log.d(TAG,"limeFacePassHelper 1195 facePassHelper == null: " + (facePassHelper == null) )
+                                        facePassHelper!!.deleteAllFaceGroup(true);
+                                        Log.d(TAG,"limeFacePassHelper 1196")
+                                        Log.d(TAG, "limeIndex 确认 = " + 535)
+                                        return
+                                    }
+
                                     if (currentSelectIndex == 1) {
                                         val switchFacePassPay = binding.ivSwitchFacePass.isSelected
                                         binding.ivSwitchFacePass.isSelected = !switchFacePassPay
@@ -480,6 +513,8 @@ class Consumption1SettingFragment :
 //                                        ttsSpeak("人脸识别正在开发中，敬请期待")
 
                                     } else if (currentSelectIndex == 2) {
+                                        binding.updateFaceConfirm.visibility = View.VISIBLE
+                                    }else if (currentSelectIndex == 3) {
                                         val switchTongLianPay = binding.ivSwitchTongLianPay.isSelected
                                         binding.ivSwitchTongLianPay.isSelected = !switchTongLianPay
                                         if (binding.ivSwitchTongLianPay.isSelected) {
@@ -495,11 +530,11 @@ class Consumption1SettingFragment :
                                         }
                                     }else if (currentSelectIndex == 0) {
                                         showSecondPage()
-                                    } else if (currentSelectIndex == 3) {
+                                    } else if (currentSelectIndex == 4) {
                                         ProcessPhoenix.triggerRebirth(App.applicationContext)
-                                    } else if (currentSelectIndex == 4){
-                                        ShellUtils.execCommand("reboot -p",false)
                                     } else if (currentSelectIndex == 5){
+                                        ShellUtils.execCommand("reboot -p",false)
+                                    } else if (currentSelectIndex == 6){
                                         ShellUtils.execCommand("reboot",false)
                                     } else {
 
@@ -631,7 +666,27 @@ class Consumption1SettingFragment :
             MessageEventType.IntervalCardType -> {
                 refreshIntervalCardType()
             }
+
+
+            MessageEventType.ShowFaceCount -> {
+                message.content?.toLong()?.let { refreshFacePassTotalCount(it) }
+            }
+
         }
+    }
+
+    private fun refreshFacePassTotalCount(count: Long) {
+        Log.d(FacePassHelper.TAG, "limeaddFacePassToLocal getFaceCount 836 " + count)
+        activity?.getColor(R.color.color_00dc82)?.let {
+            SpanUtils.with(binding.tvFaceCount)
+                .append(count.toString())
+                .setForegroundColor(it)
+                .append(" 人已入库")
+                .create()
+        }
+
+        FacePassDateBaseMMKV.setFaceCount(count)
+
     }
 
     override fun onEventReceiveMsg(message: MessageEventBean) {
@@ -734,6 +789,12 @@ class Consumption1SettingFragment :
         binding.ivSwitchFacePass.isSelected = facePassPaySwitch
         binding.ivSwitchFacePass.isSelected =  SPUtils.getInstance().getBoolean(Constants.SWITCH_FACE_PASS_PAY, false)
         binding.ivSwitchTongLianPay.isSelected = SPUtils.getInstance().getBoolean(Constants.SWITCH_TONG_LIAN_PAY)
+
+        if (facePassHelper == null) {
+            facePassHelper = FacePassHelper(activity as MainActivity);
+        }
+
+        refreshFacePassTotalCount(facePassHelper!!.faceCount)
     }
 
     private fun showSecondPage() {

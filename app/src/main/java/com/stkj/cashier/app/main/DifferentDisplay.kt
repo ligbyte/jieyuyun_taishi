@@ -1079,7 +1079,7 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
         }
 
         if (SPUtils.getInstance().getBoolean(Constants.SWITCH_FACE_PASS_PAY, false)) {
-            RkSysTool.getInstance().setGpioLevel("/proc/rk_gpio/led1", false);
+           // RkSysTool.getInstance().setGpioLevel("/proc/rk_gpio/led1", false);
         }
 
         recognizeCount = 0
