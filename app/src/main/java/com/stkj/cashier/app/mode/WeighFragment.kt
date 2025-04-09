@@ -585,6 +585,7 @@ class WeighFragment : BaseFragment<ModeViewModel, WeighFragmentBinding>(), View.
 
 
     }
+    @SuppressLint("AutoDispose", "CheckResult")
     private fun getPayStatus(payNo : String) {
         Observable.timer(1, TimeUnit.SECONDS)
             .subscribeOn(Schedulers.io())

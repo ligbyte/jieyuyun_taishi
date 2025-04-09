@@ -3,6 +3,9 @@ package com.stkj.cashier.util.util;
 import android.annotation.SuppressLint;
 import android.os.Build;
 import android.provider.Settings;
+import android.text.TextUtils;
+
+import androidx.annotation.NonNull;
 
 import com.stkj.cashier.util.constant.TimeConstants;
 
@@ -15,8 +18,6 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-
-import androidx.annotation.NonNull;
 
 /**
  * <pre>
@@ -1606,6 +1607,126 @@ public final class TimeUtils {
     private static long timeSpan2Millis(final long timeSpan, @TimeConstants.Unit final int unit) {
         return timeSpan * unit;
     }
+
+
+    /**
+     * 判断当前时间是否在指定的时间段内
+     *
+     * @param startTime 开始时间，格式为 "HH:mm:ss"
+     * @param endTime   结束时间，格式为 "HH:mm:ss"
+     * @return 如果当前时间在指定时间段内，返回 true；否则返回 false
+     */
+    public static boolean isCurrentTimeInRange(String startTime, String endTime) {
+        try {
+            // 获取当前时间
+            Date now = new Date();
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+
+            // 将开始时间和结束时间转换为 Date 对象
+            Date start = sdf.parse(startTime);
+            Date end = sdf.parse(endTime);
+
+            // 获取当前时间的小时、分钟和秒
+            Calendar nowCal = Calendar.getInstance();
+            nowCal.setTime(now);
+            int nowHour = nowCal.get(Calendar.HOUR_OF_DAY);
+            int nowMinute = nowCal.get(Calendar.MINUTE);
+            int nowSecond = nowCal.get(Calendar.SECOND);
+
+            // 获取开始时间和结束时间的小时、分钟和秒
+            Calendar startCal = Calendar.getInstance();
+            startCal.setTime(start);
+            int startHour = startCal.get(Calendar.HOUR_OF_DAY);
+            int startMinute = startCal.get(Calendar.MINUTE);
+            int startSecond = startCal.get(Calendar.SECOND);
+
+            Calendar endCal = Calendar.getInstance();
+            endCal.setTime(end);
+            int endHour = endCal.get(Calendar.HOUR_OF_DAY);
+            int endMinute = endCal.get(Calendar.MINUTE);
+            int endSecond = endCal.get(Calendar.SECOND);
+
+            // 比较当前时间是否在开始时间和结束时间之间
+            return isTimeInRange(nowHour, nowMinute, nowSecond, startHour, startMinute, startSecond, endHour, endMinute, endSecond);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * 判断给定的时间是否在指定的时间段内
+     *
+     * @param nowHour     当前时间的小时
+     * @param nowMinute   当前时间的分钟
+     * @param nowSecond   当前时间的秒
+     * @param startHour   开始时间的小时
+     * @param startMinute 开始时间的分钟
+     * @param startSecond 开始时间的秒
+     * @param endHour     结束时间的小时
+     * @param endMinute   结束时间的分钟
+     * @param endSecond   结束时间的秒
+     * @return 如果给定的时间在指定时间段内，返回 true；否则返回 false
+     */
+    private static boolean isTimeInRange(int nowHour, int nowMinute, int nowSecond, int startHour, int startMinute, int startSecond, int endHour, int endMinute, int endSecond) {
+        int nowTotalSeconds = nowHour * 3600 + nowMinute * 60 + nowSecond;
+        int startTotalSeconds = startHour * 3600 + startMinute * 60 + startSecond;
+        int endTotalSeconds = endHour * 3600 + endMinute * 60 + endSecond;
+
+        if (startTotalSeconds <= endTotalSeconds) {
+            return nowTotalSeconds >= startTotalSeconds && nowTotalSeconds <= endTotalSeconds;
+        } else {
+            // 跨越午夜的情况
+            return nowTotalSeconds >= startTotalSeconds || nowTotalSeconds <= endTotalSeconds;
+        }
+    }
+
+
+    public static int canBie(String OneTime, String TwoTime, String ThreeTime, String FourTime) {
+
+        if (!TextUtils.isEmpty(OneTime) && isValidTimeRangeFormat(OneTime) && isCurrentTimeInRange(OneTime.split("-")[0], OneTime.split("-")[1])) {
+
+            return 1;
+
+        }
+
+        if (!TextUtils.isEmpty(TwoTime) && isValidTimeRangeFormat(TwoTime) && isCurrentTimeInRange(TwoTime.split("-")[0], TwoTime.split("-")[1])) {
+
+            return 2;
+
+        }
+
+
+        if (!TextUtils.isEmpty(ThreeTime) && isValidTimeRangeFormat(ThreeTime) && isCurrentTimeInRange(ThreeTime.split("-")[0], ThreeTime.split("-")[1])) {
+
+            return 3;
+
+        }
+
+
+        if (!TextUtils.isEmpty(FourTime) && isValidTimeRangeFormat(FourTime) && isCurrentTimeInRange(FourTime.split("-")[0], FourTime.split("-")[1])) {
+
+            return 4;
+
+        }
+
+
+        return 0;
+    }
+
+
+    /**
+     * 判断字符串是否符合 "HH:mm:ss-HH:mm:ss" 格式
+     *
+     * @param timeRange 要验证的字符串
+     * @return 如果字符串符合格式，返回 true；否则返回 false
+     */
+    public static boolean isValidTimeRangeFormat(String timeRange) {
+        // 正则表达式匹配 "HH:mm:ss-HH:mm:ss" 格式
+        String regex = "^([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)-([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)$";
+        return timeRange.matches(regex);
+    }
+
 
     private static long millis2TimeSpan(final long millis, @TimeConstants.Unit final int unit) {
         return millis / unit;

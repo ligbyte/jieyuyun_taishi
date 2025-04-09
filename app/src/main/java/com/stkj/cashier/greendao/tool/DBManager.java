@@ -6,10 +6,11 @@ import android.database.sqlite.SQLiteDatabase;
 import com.stkj.cashier.App;
 import com.stkj.cashier.greendao.DaoMaster;
 import com.stkj.cashier.greendao.DaoSession;
+import com.stkj.cashier.greendao.GreenDBConstants;
 
 
 public class DBManager {
-    private final static String dbName = "company_member";
+    private final static String dbName = GreenDBConstants.FACE_DB_NAME;
     private static DBManager mInstance;
     private MyOpenHelper openHelper;
     private SQLiteDatabase db;

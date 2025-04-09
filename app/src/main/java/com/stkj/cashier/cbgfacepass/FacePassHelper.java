@@ -569,6 +569,10 @@ public class FacePassHelper extends ActivityWeakRefHolder {
                                         facePassItemInfo.setCBGFaceToken(localAddFaceToken);
                                         //绑定到本地人脸库
                                         bindFaceGroupSuccess = cbgFacePassHandHelper.bindFaceGroup(addFaceResult.faceToken);
+                                        Log.d(TAG,"limeaddFacePassToLocal getFaceCount " + getFaceCount());
+                                        EventBus.getDefault()
+                                                .post(new MessageEventBean(MessageEventType.ShowFaceCount, String.valueOf(getFaceCount() + 1)));
+
                                     } else if (bindFaceGroupResult == 1) {
                                         facePassItemInfo.setCBGCheckFaceResult(3);
                                     } else if (bindFaceGroupResult == 2) {
@@ -690,14 +694,15 @@ public class FacePassHelper extends ActivityWeakRefHolder {
                                 onFacePassListener.onLoadSingleFacePaceError(addLocalFacePassInfoWrapper, addLocalFacePassInfoWrapper.getStatusMsg(), addLocalFacePassInfoWrapper.getCurrentIndex(), addLocalFacePassInfoWrapper.getTotalSize());
                             }
                             if (status == AddLocalFacePassInfoWrapper.STATE_SUCCESS || status == AddLocalFacePassInfoWrapper.STATE_FORBID) {
+                                Log.d(TAG,"limeaddFacePassToLocal getFaceCount " + 697);
                                 onFacePassListener.onGetFacePassLocalCount(addLocalFacePassInfoWrapper.getLocalDatabaseCount());
+                                EventBus.getDefault()
+                                        .post(new MessageEventBean(MessageEventType.ShowFaceCount, String.valueOf(addLocalFacePassInfoWrapper.getLocalDatabaseCount())));
                             }
                         }
                         Log.i(TAG,"limeaddFacePassToLocal limeisEndIndex  currentIndex: " + addLocalFacePassInfoWrapper.getCurrentIndex() + "  totalSize: "  + addLocalFacePassInfoWrapper.getTotalSize());
                         //加载成功继续请求下发(除非请求数据为空)
                         if (addLocalFacePassInfoWrapper.isEndIndex()) {
-                            EventBus.getDefault()
-                                    .post(new MessageEventBean(MessageEventType.ShowLoadingDialog, "下载成功","SUCCESS"));
                             Log.d(TAG,"limeaddFacePassToLocal limeisEndIndex " + 693);
                            // 0 全量下发  1 增量下发
                            requestFacePass(1, true);
@@ -724,6 +729,8 @@ public class FacePassHelper extends ActivityWeakRefHolder {
             onFacePassListener.onLoadFacePassGroupEnd(null, msg, isError);
         }
         isRequestFacePass = false;
+        EventBus.getDefault()
+                .post(new MessageEventBean(MessageEventType.ShowLoadingDialog, "下载成功","SUCCESS"));
     }
 
     /**
@@ -789,6 +796,11 @@ public class FacePassHelper extends ActivityWeakRefHolder {
         deleteAllFaceGroup(null, needRequestAllFace);
     }
 
+    public long getFaceCount(){
+        FacePassPeopleInfoDao facePassPeopleInfoDao = daoSession.getFacePassPeopleInfoDao();
+        return facePassPeopleInfoDao.count();
+    }
+
     /**
      * 删除人脸库
      */
@@ -828,6 +840,8 @@ public class FacePassHelper extends ActivityWeakRefHolder {
                     protected void onSuccess(Integer integer) {
                         isDeleteAllFacePass = false;
                         ToastUtils.showLong("删除人脸库成功");
+                        EventBus.getDefault()
+                                .post(new MessageEventBean(MessageEventType.ShowFaceCount,"0"));
                         Log.d(TAG,"limeFacePassHelper 785");
                         if (needRequestAllFace) {
                             requestAllFacePass();

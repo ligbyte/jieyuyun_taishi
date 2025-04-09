@@ -85,6 +85,15 @@ public class FacePassPeopleInfoDao extends AbstractDao<FacePassPeopleInfo, Long>
                 "\"CALL_BACK\" INTEGER," + // 20: callBack
                 "\"CBGFACE_TOKEN\" TEXT," + // 21: CBGFaceToken
                 "\"CBGCHECK_FACE_RESULT\" INTEGER NOT NULL );"); // 22: CBGCheckFaceResult
+        // Add Indexes
+        db.execSQL("CREATE INDEX " + constraint + "IDX_FACE_PASS_PEOPLE_INFO_UNIQUE_NUMBER ON \"FACE_PASS_PEOPLE_INFO\"" +
+                " (\"UNIQUE_NUMBER\" ASC);");
+        db.execSQL("CREATE INDEX " + constraint + "IDX_FACE_PASS_PEOPLE_INFO_PHONE ON \"FACE_PASS_PEOPLE_INFO\"" +
+                " (\"PHONE\" ASC);");
+        db.execSQL("CREATE INDEX " + constraint + "IDX_FACE_PASS_PEOPLE_INFO_CARD__NUMBER ON \"FACE_PASS_PEOPLE_INFO\"" +
+                " (\"CARD__NUMBER\" ASC);");
+        db.execSQL("CREATE INDEX " + constraint + "IDX_FACE_PASS_PEOPLE_INFO_CBGFACE_TOKEN ON \"FACE_PASS_PEOPLE_INFO\"" +
+                " (\"CBGFACE_TOKEN\" ASC);");
     }
 
     /** Drops the underlying database table. */

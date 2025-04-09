@@ -42,6 +42,7 @@ public class CBGCameraHelper extends ActivityWeakRefHolder {
     private CBGFacePassHandlerHelper facePassHandlerHelper;
     private CBGFacePassHandlerHelper.OnDetectFaceListener onDetectFaceListener;
     private boolean isFaceDualCamera;
+    private long beforeTime = 0;
     private AmountFragment amountFragment;
 
     public CBGCameraHelper(@NonNull Activity activity) {
@@ -55,6 +56,7 @@ public class CBGCameraHelper extends ActivityWeakRefHolder {
 
     public void setPreviewView(SurfaceView surfaceView, SurfaceView irPreview, boolean isFaceDualCamera) {
         Activity activityWithCheck = getHolderActivityWithCheck();
+        isFaceDualCamera = false;
         Log.i(TAG, "limeopenCamera activityWithCheck 56: " + (activityWithCheck == null));
         if (activityWithCheck == null) {
             return;
@@ -113,6 +115,12 @@ public class CBGCameraHelper extends ActivityWeakRefHolder {
                                     return;
                                 }
 
+                                if (System.currentTimeMillis() - beforeTime < 500){
+                                  return;
+                                }
+
+                                beforeTime = System.currentTimeMillis();
+                                Log.d(TAG, "limeonPreviewFrame : " + 123);
                                 Camera.Parameters parameters = camera.getParameters();
                                 int width = parameters.getPreviewSize().width;
                                 int height = parameters.getPreviewSize().height;
@@ -125,6 +133,7 @@ public class CBGCameraHelper extends ActivityWeakRefHolder {
                                         facePassHandlerHelper.addFeedFrame(facePassImage);
                                     }
                                 });
+
                             } catch (Throwable e) {
                                 Log.e(TAG, "Error processing preview frame: " + e.getMessage());
                             }
@@ -217,38 +226,38 @@ public class CBGCameraHelper extends ActivityWeakRefHolder {
 //            }
 //            Log.i(TAG, "limeopenCamera prepareFacePassDetect 145");
 //            //双目识别
-////            if (irPreview != null && irCameraHelper != null) {
-////                Log.i(TAG, "limeopenCamera prepareFacePassDetect 145");
-////                if (irCameraHelper.hasPreviewView()) {
-//////                    irCameraHelper.startPreview();
-////                } else {
-////                    irCameraHelper.setNeedPreviewCallBack(true);
-////                    irCameraHelper.setCameraHelperCallback(new CameraHelper.OnCameraHelperCallback() {
-////                        @Override
-////                        public void onPreviewFrame(byte[] data, Camera camera, int displayOrientation, int previewOrientation) {
-////                            try {
-////                                if (!facePassHandlerHelper.isStartFrameDetectTask()) {
-////                                    return;
-////                                }
-////                                Camera.Parameters parameters = camera.getParameters();
-////                                int width = parameters.getPreviewSize().width;
-////                                int height = parameters.getPreviewSize().height;
-////                                int orientation = DeviceManager.getInstance().needUseIRCameraPreviewOrientation() ? previewOrientation : displayOrientation;
-////                                FacePassImage facePassImage = new FacePassImage(data, width, height, orientation, FacePassImageType.NV21);
-////                                runUIThreadWithCheck(new Runnable() {
-////                                    @Override
-////                                    public void run() {
-////                                        facePassHandlerHelper.addIRFrame(facePassImage);
-////                                    }
-////                                });
-////                            } catch (Throwable e) {
-////                                Log.e(TAG, "limeopenCamera openCameraById 169: " + e.getMessage());
-////                            }
-////                        }
-////                    });
-////                    irCameraHelper.prepare(irPreview, true);
-////                }
-////            }
+//            if (irPreview != null && irCameraHelper != null) {
+//                Log.i(TAG, "limeopenCamera prepareFacePassDetect 145");
+//                if (irCameraHelper.hasPreviewView()) {
+////                    irCameraHelper.startPreview();
+//                } else {
+//                    irCameraHelper.setNeedPreviewCallBack(true);
+//                    irCameraHelper.setCameraHelperCallback(new CameraHelper.OnCameraHelperCallback() {
+//                        @Override
+//                        public void onPreviewFrame(byte[] data, Camera camera, int displayOrientation, int previewOrientation) {
+//                            try {
+//                                if (!facePassHandlerHelper.isStartFrameDetectTask()) {
+//                                    return;
+//                                }
+//                                Camera.Parameters parameters = camera.getParameters();
+//                                int width = parameters.getPreviewSize().width;
+//                                int height = parameters.getPreviewSize().height;
+//                                int orientation = DeviceManager.getInstance().needUseIRCameraPreviewOrientation() ? previewOrientation : displayOrientation;
+//                                FacePassImage facePassImage = new FacePassImage(data, width, height, orientation, FacePassImageType.NV21);
+//                                runUIThreadWithCheck(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        facePassHandlerHelper.addIRFrame(facePassImage);
+//                                    }
+//                                });
+//                            } catch (Throwable e) {
+//                                Log.e(TAG, "limeopenCamera openCameraById 169: " + e.getMessage());
+//                            }
+//                        }
+//                    });
+//                    irCameraHelper.prepare(irPreview, true);
+//                }
+//            }
 //            //人脸识别回调
 //            if (facePassHandlerHelper != null) {
 //                facePassHandlerHelper.setOnDetectFaceListener(onDetectFaceListener);

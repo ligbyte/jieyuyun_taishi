@@ -27,6 +27,7 @@ import com.stkj.cashier.component.ComponentAppManager
 import com.stkj.cashier.constants.Constants
 import com.stkj.cashier.deviceinterface.DeviceManager
 import com.stkj.cashier.glide.GlideAppHelper
+import com.stkj.cashier.greendao.tool.DBManager
 import com.stkj.cashier.util.camera.FacePassCameraType
 import com.stkj.cashier.util.util.CrashHandler
 import dagger.hilt.android.HiltAndroidApp
@@ -50,6 +51,11 @@ class App : Application() {
         var serialNumber: String = ""
         @JvmStatic
         var isFirst = true
+        @JvmStatic
+        var isFirstDetect = true
+
+        @JvmStatic
+        var faceDetectCount:Int = 0
 
         var BASE_URL: String = ""
         lateinit var TTS: TextToSpeech//tts语速
@@ -82,6 +88,7 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        faceDetectCount = 0
 //        if (BuildConfig.envType == 0) {
 //            BASE_URL = Constants.BASE_OFFICIAL_URL
 //        } else {
@@ -89,6 +96,7 @@ class App : Application() {
 //        }
         BASE_URL = Constants.BASE_OFFICIAL_URL
         AppManager.INSTANCE.init(this)
+
 
         //初始化设备
         //DeviceManager.getInstance().initDevice(this)
@@ -98,7 +106,7 @@ class App : Application() {
         initTTS()
         initLogger()
         KVCache.initialize(this)
-//        Bugly.init(this, Constants.BUGLY_APP_ID, BuildConfig.DEBUG)
+        //Bugly.init(this, Constants.BUGLY_APP_ID, BuildConfig.DEBUG)
 
         Toasty.Config.getInstance().allowQueue(false).apply()
         instance.applicationContext = this

@@ -55,6 +55,7 @@ import com.stkj.cashier.bean.MessageEventBean
 import com.stkj.cashier.bean.Result
 import com.stkj.cashier.bean.db.CompanyMemberdbEntity
 import com.stkj.cashier.cbgfacepass.CBGFacePassHandlerHelper
+import com.stkj.cashier.cbgfacepass.FacePassHelper
 import com.stkj.cashier.cbgfacepass.data.CBGFacePassConfigMMKV
 import com.stkj.cashier.cbgfacepass.permission.CBGPermissionRequest
 import com.stkj.cashier.common.permissions.callback.PermissionCallback
@@ -136,6 +137,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
     private val fragments by lazy {
         SparseArray<Fragment>()
     }
+    var facePassHelper: FacePassHelper? = null;
     var pageIndex = 1
     var pageSize = 5000
     private lateinit var mDisplayManager: DisplayManager//屏幕管理类
@@ -228,18 +230,30 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                 }
                 ///dev/ttyS5 读卡 /dev/ttyS1 读卡  //ttyS3 称重 115200
                 val serialHelper: SerialHelper = object : SerialHelper("/dev/ttyS4", 115200) {
+                    @SuppressLint("SuspiciousIndentation")
                     override fun onDataReceived(comBean: ComBean) {
                         try {
                             LogUtils.i("读卡", comBean.bRec)
 
                             val data = ConvertUtils.bytes2HexString(comBean.bRec)
-                            Log.i(TAG,"limecard 读卡 data " + data)
+
+                            LogUtils.i("limecard =============================================  ", data)
+
+
+                            if (!data.startsWith("53") || data.length < 14 || data.endsWith("00000000")){
+                                return
+                            }
+
 
                             Log.i(TAG,"limecard 读卡 data data.substring(6, 14) " + data.substring(6, 14))
 
                             val card: String =
                                 ParseData.decodeHexStringIdcard2Int(data.substring(6, 14))
                             Log.i(TAG,"limecard 读卡 card " +  card)
+
+                            if (card.equals("00000000")){
+                                return
+                            }
 
                             if (DifferentDisplay.isStartFaceScan.get() && (mainFragment.amountFragment.isPaying() || mainFragment.amountFragment.isRefund())) {
                                 if (mainFragment.amountFragment.isRefundListShow()){
@@ -261,12 +275,14 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                                 }
                                 beforeCardNumber = card
                                 mainFragment.amountFragment.isScanCode = true
-                                EventBus.getDefault().post(
-                                    MessageEventBean(
-                                        MessageEventType.AmountCard,
-                                        card
+                                Log.w(TAG,"limecard cardData" + 325)
+                                    EventBus.getDefault().post(
+                                        MessageEventBean(
+                                            MessageEventType.AmountCard,
+                                            card
+                                        )
                                     )
-                                )
+
                             }else{
                                 Log.d(TAG,"limequeryBalanceByCard mainFragment.amountFragment.isPaying(): " + mainFragment.amountFragment.isPaying())
                                 if (!mainFragment.amountFragment.isRefund() && !mainFragment.amountFragment.showPayStatus()) {
@@ -561,10 +577,17 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
         viewModel.deviceStatus.observe(this) {
             LogUtils.e("deviceStatus observe")
             var indexs = it.data?.updateUserInfo?.split("&")
+            getIntervalCardType()
             if (indexs != null) {
                 for (item in indexs) {
                     LogUtils.e("心跳item" + item + "/" + callBack + "/" + latch?.count + "/" + allFaceDown)
                     if (item == "1") {
+
+                        if (facePassHelper == null) {
+                            facePassHelper = FacePassHelper(MainActivity@this);
+                        }
+                        Log.d(TAG,"limeFacePassHelper 1195 facePassHelper == null: " + (facePassHelper == null) )
+                        facePassHelper!!.requestFacePass(1, false)
                         /* if (queueManager == null) {
                              LogUtils.e("queueManager=null")
                              queueManager = QueueManager()
@@ -576,10 +599,11 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                              })
                              LogUtils.e("item下发" + item)
                          }*/
-                        if ((latch?.count == 0L || latch == null) && !allFaceDown) {
-                            companyMember(1)
-                            LogUtils.e("item下发" + item)
-                        }
+//                        if ((latch?.count == 0L || latch == null) && !allFaceDown) {
+//                            companyMember(1)
+//                            LogUtils.e("item下发" + item)
+//                        }
+
 //                        isBreak=true
 //
                     } else if (item == "2") {
@@ -1201,7 +1225,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
 
     private fun initFaceRecognition() {
         // 初始化人脸识别
-        val facePassHelper = getWeakRefHolder(CBGFacePassHandlerHelper::class.java)
+        var facePassHelper = getWeakRefHolder(CBGFacePassHandlerHelper::class.java)
         facePassHelper?.setOnInitFacePassListener(object : CBGFacePassHandlerHelper.OnInitFacePassListener {
             override fun onInitSuccess() {
                 //initData()
@@ -1232,7 +1256,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
                     CBGFacePassConfigMMKV.setDefPoseThreshold(defaultPoseThreshold)
                     val supportDualCamera = DeviceManager.getInstance().isSupportDualCamera
                     val facePassConfig = CBGFacePassConfigMMKV.getFacePassConfig(supportDualCamera)
-                    val facePassHelper = getWeakRefHolder(CBGFacePassHandlerHelper::class.java)
+                    facePassHelper = getWeakRefHolder(CBGFacePassHandlerHelper::class.java)
                     facePassHelper?.initAndAuthSdk(facePassConfig)
                     Log.d(TAG, "limeinitAndAuthSdk : " + 1120)
                     Log.d(TAG, "limeinitAndAuthSdk facePassHelper: " + (facePassHelper == null))
@@ -1636,6 +1660,14 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
 //        Log.d("EventBus_Subscriber", "onReceiveMsg_MAIN: " + message.toString());
         when (message.type) {
 
+            MessageEventType.RquestAgain -> {
+                initCheckStatus()
+                requestNetStatus()
+                clickVersionUpdate()
+                company()
+                offlineSet()
+                getIntervalCardType()
+            }
             MessageEventType.ModifyBalanceError -> {
                 handlePayLogic()
             }
@@ -1685,12 +1717,14 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
 
     override fun onDestroy() {
         super.onDestroy()
+        RkSysTool.getInstance().setGpioLevel("/proc/rk_gpio/led1", true);
         EventBus.getDefault().unregister(this)
         reportDeviceStatusDisposable.dispose()
         currentTimeDisposable?.dispose()
         netStatusDisposable?.dispose()
         mPresentation?.dismiss()
         cbgCameraHelper?.releaseCameraHelper()
+        facePassHelper?.onClear()
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -2010,7 +2044,7 @@ class MainActivity : BaseActivity<MainViewModel, MainActivityBinding>(), View.On
             }
 
 
-        },1000)
+        },2000)
 
 
     }

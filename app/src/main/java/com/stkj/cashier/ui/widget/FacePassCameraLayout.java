@@ -17,7 +17,9 @@ import com.stkj.cashier.App;
 import com.stkj.cashier.R;
 import com.stkj.cashier.common.core.AppManager;
 import com.stkj.cashier.common.ui.widget.surfaceview.AutoFitSurfaceView;
+import com.stkj.cashier.constants.Constants;
 import com.stkj.cashier.glide.GlideApp;
+import com.stkj.cashier.util.util.SPUtils;
 
 /**
  * 人脸识别摄像头布局
@@ -97,11 +99,15 @@ public class FacePassCameraLayout extends FrameLayout {
                     @Override
                     public void run() {
                         App.setFirst(false);
-                        ivDefaultFace.setImageResource(0);
+                        if (SPUtils.getInstance().getBoolean(Constants.SWITCH_FACE_PASS_PAY, false)){
+                            ivDefaultFace.setImageResource(0);
+                        }
                     }
                 }, 3000);
             }else {
-                ivDefaultFace.setImageResource(0);
+                if (SPUtils.getInstance().getBoolean(Constants.SWITCH_FACE_PASS_PAY, false)){
+                    ivDefaultFace.setImageResource(0);
+                }
             }
         } else {
             ivDefaultFace.setImageResource(R.mipmap.icon_welcome_consumer);

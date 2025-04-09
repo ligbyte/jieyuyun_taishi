@@ -15,12 +15,16 @@ object Constants {
     //const val BASE_OFFICIAL_URL = "http://101.42.54.44:9003"
     // 万基正式
     //const val BASE_OFFICIAL_URL = "https://cater.wanjigroup.com:9997"
+
+    // 国梁电脑
+    //const val BASE_OFFICIAL_URL = "http://10.10.10.101:9003/"
+
     // 测试
     const val BASE_OFFICIAL_URL = "http://101.43.252.67:9003/"
     // 本地
     //const val BASE_OFFICIAL_URL = "http://10.10.10.114:9003/"
     // TODO Bugly 申请的 AppId
-    const val BUGLY_APP_ID = "5e7c47b81a"
+    const val BUGLY_APP_ID = "9d0b428b32"
 
     const val TAG = "Jenly"
 
@@ -36,6 +40,10 @@ object Constants {
 
     //---------------------------------------------
 
+    const val KEY_INTERVALCARDTYPE = "key_intervalcardtype"
+
+    const val KEY_TENANT_ID = "key_tenant_id"
+
     const val KEY_TITLE = "key_title"
 
     const val KEY_URL = "key_url"
@@ -43,6 +51,7 @@ object Constants {
     const val KEY_TOKEN = "key_token"
 
     const val KEY_USERNAME = "key_username"
+    const val KEY_DEVICE_NAME = "key_device_name"
 
     const val KEY_BEAN = "key_bean"
 
@@ -84,6 +93,7 @@ object Constants {
     const val SWITCH_PAY = "SWITCH_PAY" //消费后自动清零
     const val SWITCH_FACE_PASS_PAY = "switch_face_pass_pay" //刷脸消费
     const val SWITCH_TONG_LIAN_PAY = "switch_tong_lian_pay" //通联支付
+    const val SWITCH_OFFLINE_PAY = "switch_offline_pay" //离线支付
     const val SWITCH_FIX_AMOUNT = "SWITCH_FIX_AMOUNT" //定额模式开关
 
     const val CURRENT_FIX_AMOUNT_TIME = "CURRENT_FIX_AMOUNT_TIME" //当前定额模式时间段
@@ -96,6 +106,9 @@ object Constants {
 
     const val DINNER_SWITCH = "DINNER_SWITCH" //晚餐开关
     const val DINNER_AMOUNT = "DINNER_AMOUNT" //晚餐金额
+
+    const val YECAN_SWITCH = "YECAN_SWITCH" //夜餐开关
+    const val YECAN_AMOUNT = "YECAN_AMOUNT" //夜餐金额
     /*
     人脸识别设置
      */
@@ -115,6 +128,8 @@ object Constants {
 
     //消费模式设置页面
     const val FRAGMENT_SET = "ConsumptionSettingFragment"
+
+    const val ShowFourPage = "showfourpage"
 
     //消费模式设置页面
     const val FRAGMENT_AMOUNT = "AmountFragment"

@@ -34,7 +34,7 @@ public class CBGFacePassConfigMMKV {
      * 其中入库的模式只有0和2两种，即0：遮挡允许入库，2：遮挡不允许入库！
      */
     public static boolean getOcclusionMode() {
-        return getFacePassMMKV().getBoolean("occlusionMode", false);
+        return getFacePassMMKV().getBoolean("occlusionMode", true);
     }
 
     public static void putOcclusionMode(boolean enable) {
@@ -212,6 +212,7 @@ public class CBGFacePassConfigMMKV {
          * 表示允许进行识别的最小人脸尺寸。100 1m | 125 0.8m | 150 0.5m
          */
         cbgFacePassConfig.setDetectFaceMinThreshold(getDetectFaceMinThreshold());
+        //cbgFacePassConfig.setDetectFaceMinThreshold(292);
         cbgFacePassConfig.setAddFaceMinThreshold(getAddFaceMinThreshold());
         cbgFacePassConfig.setPoseThreshold(getPoseThreshold());
         //识别结果分数

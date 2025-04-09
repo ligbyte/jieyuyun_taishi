@@ -10,6 +10,16 @@ public class FacePassDateBaseMMKV {
     public static final String MMKV_NAME = "face_pass_db_setting";
     public static final String KEY_DEPARTMENT_LIST = "people_department_list";
     public static final String KEY_ACCOUNT_TYPE_LIST = "people_account_type_list";
+    public static final String KEY_FACE_COUNT = "key_face_count";
+
+
+    public static long getFaceCount() {
+        return getMMKV().getLong(KEY_FACE_COUNT, 0);
+    }
+
+    public static void setFaceCount(long count) {
+        getMMKV().putLong(KEY_FACE_COUNT, count);
+    }
 
     public static Set<String> getDepartmentList() {
         MMKV mmkv = getMMKV();

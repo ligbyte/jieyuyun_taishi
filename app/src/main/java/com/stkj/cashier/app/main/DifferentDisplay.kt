@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.stkj.cashier.App
+import com.stkj.cashier.App.instance.faceDetectCount
 import com.stkj.cashier.R
 import com.stkj.cashier.app.adapter.ConsumeRefundListAdapter
 import com.stkj.cashier.app.base.helper.CommonTipsHelper
@@ -38,12 +39,18 @@ import com.stkj.cashier.bean.MessageEventBean
 import com.stkj.cashier.bean.db.CompanyMemberdbEntity
 import com.stkj.cashier.cbgfacepass.CBGFacePassHandlerHelper
 import com.stkj.cashier.cbgfacepass.FacePassHelper
+import com.stkj.cashier.cbgfacepass.data.CBGFacePassConfigMMKV
 import com.stkj.cashier.cbgfacepass.model.CBGFacePassRecognizeResult
 import com.stkj.cashier.cbgfacepass.model.FacePassPeopleInfo
+import com.stkj.cashier.cbgfacepass.permission.CBGPermissionRequest
+import com.stkj.cashier.common.permissions.callback.PermissionCallback
 import com.stkj.cashier.config.MessageEventType
 import com.stkj.cashier.constants.Constants
+import com.stkj.cashier.deviceinterface.DeviceManager
 import com.stkj.cashier.greendao.biz.CompanyMemberBiz
+import com.stkj.cashier.permission.AppPermissionHelper
 import com.stkj.cashier.ui.widget.FacePassCameraLayout
+import com.stkj.cashier.util.RkSysTool
 import com.stkj.cashier.util.SettingVar
 import com.stkj.cashier.util.camera.CameraManager
 import com.stkj.cashier.util.camera.CameraPreviewData
@@ -53,11 +60,13 @@ import com.stkj.cashier.util.util.LogUtils
 import com.stkj.cashier.util.util.SPUtils
 import com.stkj.cashier.util.util.SpanUtils
 import com.stkj.cashier.util.util.ThreadUtils.runOnUiThread
+import com.stkj.cashier.util.util.ToastUtils
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.observers.DisposableObserver
 import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -110,6 +119,8 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
     private var consumerListener: ConsumerListener? = null
     private var beforeFaceToken = "";
     private var beforeTime:Long = 0L;
+    private var recognizeCount:Int = 0
+    private var cbgCameraHelper: CBGCameraHelper? = null;
 //    private lateinit var cameraPreview: CameraPreview
 //    private var ivCameraOverLayer:ImageView? = null
 //    private var ivSuccessHeader:ImageView? = null
@@ -134,7 +145,7 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    @SuppressLint("HardwareIds")
+    @SuppressLint("HardwareIds", "SuspiciousIndentation")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState);
         try{
@@ -188,6 +199,37 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
         tvRefundName2 = findViewById<TextView>(R.id.tvRefundName2)
         ivHeader2 = findViewById<ImageView>(R.id.ivHeader2)
         rvRefund = findViewById<RecyclerView>(R.id.rvRefund)
+
+
+            tvWindow.postDelayed({
+                if (tvWindow.text.equals("第--窗口")){
+                    EventBus.getDefault().post(MessageEventBean(MessageEventType.RquestAgain))
+                }
+            },30 * 1000)
+
+            tvWindow.postDelayed({
+                if (tvWindow.text.equals("第--窗口")){
+                    EventBus.getDefault().post(MessageEventBean(MessageEventType.RquestAgain))
+                }
+            },60 * 1000)
+
+            tvWindow.postDelayed({
+                if (tvWindow.text.equals("第--窗口")){
+                    EventBus.getDefault().post(MessageEventBean(MessageEventType.RquestAgain))
+                }
+            },2 * 60 * 1000)
+
+            tvWindow.postDelayed({
+                if (tvWindow.text.equals("第--窗口")){
+                    EventBus.getDefault().post(MessageEventBean(MessageEventType.RquestAgain))
+                }
+            },3 * 60 * 1000)
+
+            tvWindow.postDelayed({
+                if (tvWindow.text.equals("第--窗口")){
+                    EventBus.getDefault().post(MessageEventBean(MessageEventType.RquestAgain))
+                }
+            },5 * 60 * 1000)
 
         val ctvConsumer = findViewById<CommonTipsView>(R.id.ctv_consumer);
         CommonTipsHelper.INSTANCE.setConsumerTipsView(ctvConsumer)
@@ -423,9 +465,6 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
 //        }
     }
 
-    private fun hideSuccessFace() {
-        //fpcFace!!.setPreviewFace(false)
-    }
 
     private fun hideBalance() {
         flCameraAvatar.visibility = View.VISIBLE
@@ -467,6 +506,7 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
         llPayError.visibility = View.GONE
     }
 
+    @SuppressLint("CheckResult")
     private fun showPayError(errorMsg: String) {
         flCameraAvatar.visibility = View.GONE
         tvFaceTips2.visibility = View.GONE
@@ -487,6 +527,28 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
         } else {
             tvPayError.text = errorMsg
         }
+
+
+        Observable.timer(1500, TimeUnit.MILLISECONDS)
+            .subscribeOn(Schedulers.io()) // 在IO调度器上订阅
+            .observeOn(AndroidSchedulers.mainThread()) // 在主线程上观察
+            .subscribe(
+                { aLong: Long? ->
+                    // 这里的代码会在3秒后执行一次
+                    hidePayError()
+                    hideBalance()
+                    tvFaceTips2.visibility = View.GONE
+
+                    tvFaceTips.visibility = View.VISIBLE
+                    tvFaceTips.text = "欢迎就餐"
+                    fpcFace!!.setPreviewFace(false)
+                    Log.d(TAG, "limesetPreviewFace   欢迎就餐 : " + 525)
+                }
+            ) { throwable: Throwable? ->
+                // 当发生错误时，这里的代码会被执行
+                Log.e("RxJava", "Error", throwable)
+            }
+
     }
 
     //接收事件
@@ -503,13 +565,11 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
 //                startFacePassDetect()
 //                ivCameraOverLayer?.visibility = View.GONE
                 goFacePassAuth()
-                hideSuccessFace()
             }
             MessageEventType.CloseFacePassPay -> {
 //                stopFacePassDetect()
 //                ivCameraOverLayer?.visibility  = View.VISIBLE
                 stopFacePassAuth()
-                hideSuccessFace()
 //                closeAndReleaseCamera()
             }
             MessageEventType.AmountNotice -> {
@@ -530,8 +590,18 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
                     tvFaceTips.text = "金额：$realAmount" + "元"
                     tvFaceTips2.visibility = View.VISIBLE
                     tvFaceTips2.text = "请支付"
+                    if (SPUtils.getInstance().getBoolean(Constants.SWITCH_FACE_PASS_PAY, false)){
+                        fpcFace!!.setPreviewFace(true)
+                        Log.d(TAG, "limesetPreviewFace   请支付 : " + 525)
+                    }
                 }
-                hideSuccessFace()
+                val switchFacePassPay = SPUtils.getInstance().getBoolean(Constants.SWITCH_FACE_PASS_PAY, false)
+                if (switchFacePassPay) {
+                    goFacePassAuth()
+                } else {
+                    stopFacePassAuth()
+                }
+                Log.d(TAG, "limeonEventReceiveMsg: " + 541)
                 LogUtils.e("DiffAmountNotice取消操作" + isStartFaceScan)
             }
             MessageEventType.AmountNotice2 -> {
@@ -544,8 +614,9 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
                 tvFaceTips.visibility = View.VISIBLE
                 tvFaceTips.text = "欢迎就餐"
                 fpcFace!!.setPreviewFace(false)
+                Log.d(TAG, "limesetPreviewFace   欢迎就餐 : " + 597)
                 tvFaceTips2.visibility = View.GONE
-                hideSuccessFace()
+                Log.d(TAG, "limeonEventReceiveMsg: " + 556)
             }
             MessageEventType.AmountNotice3 -> {
                 hidePayError()
@@ -565,9 +636,21 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
                     tvFaceTips.text = realAmount
                     tvFaceTips2.visibility = View.VISIBLE
                     tvFaceTips2.text = "请支付"
+                    if (SPUtils.getInstance().getBoolean(Constants.SWITCH_FACE_PASS_PAY, false)){
+                        fpcFace!!.setPreviewFace(true)
+                        Log.d(TAG, "limesetPreviewFace   请支付 : " + 621)
+                    }
                 }
-                hideSuccessFace()
+                val switchFacePassPay = SPUtils.getInstance().getBoolean(Constants.SWITCH_FACE_PASS_PAY, false)
+                if (switchFacePassPay) {
+                    goFacePassAuth()
+                } else {
+                    stopFacePassAuth()
+                }
+                fpcFace!!.setPreviewFace(true)
+                Log.d(TAG, "limesetPreviewFace   true : " + 631)
                 LogUtils.e("DiffAmountNotice3取消操作" + isStartFaceScan)
+                Log.d(TAG, "limeonEventReceiveMsg: " + 579)
             }
             MessageEventType.AmountPayingNotice -> {
                 tvFaceTips2.visibility = View.VISIBLE
@@ -594,12 +677,14 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
                             // 这里的代码会在3秒后执行一次
                             hidePayError()
                             hideBalance()
-                            hideSuccessFace()
                             tvFaceTips2.visibility = View.GONE
 
                             tvFaceTips.visibility = View.VISIBLE
                             tvFaceTips.text = "欢迎就餐"
+
                             fpcFace!!.setPreviewFace(false)
+
+                            Log.d(TAG, "limesetPreviewFace   欢迎就餐 : " + 664)
                         }
                     ) { throwable: Throwable? ->
                         // 当发生错误时，这里的代码会被执行
@@ -629,12 +714,11 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
                             // 这里的代码会在3秒后执行一次
                             hidePayError()
                             hideBalance()
-                            hideSuccessFace()
                             tvFaceTips2.visibility = View.GONE
-
                             tvFaceTips.visibility = View.VISIBLE
                             tvFaceTips.text = "欢迎就餐"
                             fpcFace!!.setPreviewFace(false)
+                            Log.d(TAG, "limesetPreviewFace   欢迎就餐 : " + 698)
                         }
                     ) { throwable: Throwable? ->
                         // 当发生错误时，这里的代码会被执行
@@ -667,7 +751,6 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
             }
 
             MessageEventType.AmountRefund -> {
-                hideSuccessFace()
                 //点击退单按钮按键
                 val switchFacePassPay =
                     SPUtils.getInstance().getBoolean(Constants.SWITCH_FACE_PASS_PAY)
@@ -686,6 +769,7 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
                 //点击退单按钮按键
                 tvFaceTips.text = "欢迎就餐"
                 fpcFace!!.setPreviewFace(false)
+                Log.d(TAG, "limesetPreviewFace   欢迎就餐 : " + 750)
                 tvFaceTips2.visibility = View.GONE
                 llDefault.visibility = View.VISIBLE
                 llRefundList.visibility = View.GONE
@@ -693,7 +777,6 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
                 isStartFaceScan.set(false)
                 hidePayError()
                 hideBalance()
-                hideSuccessFace()
             }
             MessageEventType.AmountRefundList -> {
                 //退款列表
@@ -991,6 +1074,15 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
 
     protected fun goFacePassAuth() {
 
+        if (!SPUtils.getInstance().getBoolean(Constants.SWITCH_FACE_PASS_PAY, false)){
+            return
+        }
+
+        if (SPUtils.getInstance().getBoolean(Constants.SWITCH_FACE_PASS_PAY, false)) {
+            RkSysTool.getInstance().setGpioLevel("/proc/rk_gpio/led1", false);
+        }
+
+        recognizeCount = 0
         isRunningFacePassAuth = true
         canSpeakFacePassFail = true
         if (canSpeakFacePassFailObserver != null) {
@@ -998,29 +1090,55 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
             canSpeakFacePassFailObserver = null
         }
 
+        Log.d(TAG, "limeprocessFacePassResult ========================================== 1045 ")
         setFacePreview(true)
-        val cbgCameraHelper: CBGCameraHelper? =
+         cbgCameraHelper =
             (outerContext as MainActivity).getWeakRefHolder(CBGCameraHelper::class.java)
+        Log.d(TAG, "limeprocessFacePassResult ========================================== 1058 " + (cbgCameraHelper == null))
         cbgCameraHelper?.setOnDetectFaceListener(object :
             CBGFacePassHandlerHelper.OnDetectFaceListener {
             override fun onDetectFaceToken(faceTokenList: List<CBGFacePassRecognizeResult?>?) {
-                Log.i(TAG, "limeprocessFacePassResult onDetectFaceToken 1196")
+                Log.i(TAG, "limeprocessFacePassResult onDetectFaceToken 1052")
                 processFacePassResult(faceTokenList)
             }
 
             override fun onNoDetectFaceToken() {
+                Log.i(TAG, "limeprocessFacePassResult processFacePassFailRetryDelay 1057")
                 processFacePassFailRetryDelay(-1)
             }
         })
+        Log.d(TAG, "limeprocessFacePassResult ========================================== 1076 " + (cbgCameraHelper == null))
         GlobalScope.launch {
             try {
+                if (App.isFirstDetect){
+                    App.isFirstDetect = false
+                    delay(3100)
+                }
+
                 cbgCameraHelper?.prepareFacePassDetect()
                 cbgCameraHelper?.startFacePassDetect()
+
             } catch (e: Throwable) {
                 Log.e(TAG, "limeException 1208: " + e.message)
             }
         }
+
+//        fpcFace?.postDelayed({
+//                        try {
+//                if (App.isFirstDetect){
+//                    App.isFirstDetect = false
+//                    //delay(3100)
+//                }
+//                cbgCameraHelper?.prepareFacePassDetect()
+//                cbgCameraHelper?.startFacePassDetect()
+//
+//            } catch (e: Throwable) {
+//                Log.e(TAG, "limeException 1208: " + e.message)
+//            }
+//        },3100L)
+
     }
+
 
 
     /**
@@ -1055,14 +1173,19 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
                             //停止所有的识别检测
                             stopFacePassAuth()
                             handleFacePassSuccess(facePassPeopleInfo)
+                            Log.i(TAG, "limeprocessFacePassResult onDetectFaceToken 1104")
                         }
 
                         override fun onHandleLocalFaceError(faceToken: String?) {
+                            Log.i(TAG, "limeprocessFacePassResult processFacePassFailRetryDelay 1107")
                             processFacePassFailRetryDelay(-1)
                         }
                     })
             } else {
-                facePassRecognizeResult?.recognitionState?.let { processFacePassFailRetryDelay(it) }
+                facePassRecognizeResult?.recognitionState?.let {
+                    Log.i(TAG, "limeprocessFacePassResult processFacePassFailRetryDelay 1114")
+                    processFacePassFailRetryDelay(it)
+                }
             }
         }
     }
@@ -1118,13 +1241,15 @@ class DifferentDisplay : Presentation, CameraManager.CameraListener, View.OnClic
     }
 
     protected fun handleFacePassError(canSpeakFacePassFail: Boolean, recognizeState: Int) {
+        Log.d(TAG, "limehandleFacePassError canSpeakFacePassFail: " + canSpeakFacePassFail)
+        Log.i(TAG, "limeprocessFacePassResult ============================================================== 1173")
         //人脸识别失败 canSpeakFacePassFail (5s后置为true)
-        ttsSpeak("识别失败,正在重试")
-//        if (canSpeakFacePassFail) {
-//            ttsSpeak("识别失败,正在重试")
-//        }
-    }
+        recognizeCount ++;
+        if (recognizeCount == 7) {
+            ttsSpeak("识别失败")
+        }
 
+    }
 
 
 }

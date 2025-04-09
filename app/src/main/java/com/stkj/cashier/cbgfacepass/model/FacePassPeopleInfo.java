@@ -3,6 +3,7 @@ package com.stkj.cashier.cbgfacepass.model;
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
+import org.greenrobot.greendao.annotation.Index;
 import org.greenrobot.greendao.annotation.Unique;
 
 /**
@@ -13,16 +14,19 @@ public class FacePassPeopleInfo {
 
     @Id(autoincrement = true)
     private Long id;
+    @Index
     private String Unique_number;
     private Integer Card_state;
     private String UID;
     private String Full_Name;
     private String DepNameType;
     private String IdentityCard;
+    @Index
     private String Phone;
 
     @Unique
     private String UserNumber;
+    @Index
     private String Card_Number;
     private String CardType;
     private double Balance;
@@ -37,6 +41,7 @@ public class FacePassPeopleInfo {
     private Boolean callBack;
 
     //旷视人脸识别face token
+    @Index
     private String CBGFaceToken;
     private int CBGCheckFaceResult;
 

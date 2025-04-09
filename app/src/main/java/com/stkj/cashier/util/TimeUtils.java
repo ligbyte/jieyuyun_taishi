@@ -5,6 +5,8 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
+import com.stkj.cashier.util.util.LogUtils;
+
 import java.time.LocalTime;
 
 public class TimeUtils {
@@ -18,11 +20,12 @@ public class TimeUtils {
             beginTime = LocalTime.parse(start);
             endTime = LocalTime.parse(end);
         } catch (Throwable e) {
-            Log.e("TAG", "limeException 21: " + e.getMessage());
+            Log.e("TAG", "checkCurrentAmountMode 21: " + e.getMessage());
         }
         if (beginTime == null || endTime == null) {
             return false;
         }
+        LogUtils.e("checkCurrentAmountMode RefreshFixAmountMode split[0]: " + 28);
         LocalTime nowTime = LocalTime.now();
 
         return nowTime.isAfter(beginTime) && nowTime.isBefore(endTime);

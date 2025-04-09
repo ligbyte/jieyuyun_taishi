@@ -400,6 +400,7 @@ public abstract class DeviceInterface {
     //默认识别距离阈值
     public int getDefaultDetectFaceMinThreshold() {
         return 512 - get50cmDetectFaceMinThreshold();
+
     }
 
     /**

@@ -2,6 +2,10 @@ package com.stkj.cashier.config
 
 interface MessageEventType {
     companion object {
+
+        const val OpenOfflinePay = 4000
+        const val CloseOfflinePay = 4001
+
         const val OpenFacePassPay = 900
         const val CloseFacePassPay = 910
         const val OpenTongLianPayPay = 920
@@ -32,6 +36,25 @@ interface MessageEventType {
 
         const val ShowLoadingDialog = 3000
         const val DismissLoadingDialog = 3001
+
+        const val ShowFaceCount = 3003
+
+        const val UplaodOfflineOrders = 3004
+
+        const val ShowOfflineOrders = 3005
+
+        const val RquestAgain = 3006
+
+        const val RefreshFourPageData = 3007
+
+        const val ShowSyncDialog = 3008
+
+        const val UplaodOfflineOrdersWithLoading = 3009
+
+        const val OfflineDataSyncError = 3010
+
+
+        const val OfflineOrderUpdate = 3011
 
         const val HeadBeat = 1120
         const val AmountSuccess = 1130

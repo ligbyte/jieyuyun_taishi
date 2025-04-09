@@ -1,17 +1,24 @@
 package com.stkj.cashier.common.utils;
 
+import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -385,6 +392,100 @@ public class FileUtils {
             Log.d("FileUtils", "--file2Bytes error--");
         }
         return null;
+    }
+
+
+
+    public static List<String> getStorageDirectories() {
+        File storageDir = new File("/storage");
+
+        if (storageDir.exists() && storageDir.isDirectory()) {
+            File[] files = storageDir.listFiles();
+            if (files != null) {
+                return Arrays.stream(files)
+                        .filter(File::isDirectory) // 仅保留文件夹
+                        .filter(file -> !file.getName().startsWith(".")) // 排除隐藏文件夹
+                        .map(File::getName) // 提取文件夹名称
+                        .collect(Collectors.toList());
+            }
+        }
+
+        return new ArrayList<>();
+    }
+
+
+    /**
+     * 执行adb shell命令并返回结果列表
+     * @param command 要执行的命令（如"ls /storage"）
+     * @return 包含命令输出的List，每行一个元素
+     */
+    public static List<String> executeAdbShellCommand(String command) {
+        List<String> outputLines = new ArrayList<>();
+        Process process = null;
+        BufferedReader reader = null;
+
+        try {
+            // 执行adb shell命令
+            process = Runtime.getRuntime().exec("adb shell " + command);
+            reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+            // 逐行读取输出
+            String line;
+            while ((line = reader.readLine()) != null) {
+                outputLines.add(line);
+            }
+
+            // 等待命令执行完成
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                outputLines.add("Command failed with exit code: " + exitCode);
+            }
+        } catch (Exception e) {
+            outputLines.add("Error executing command: " + e.getMessage());
+        } finally {
+            // 清理资源
+            try {
+                if (reader != null) reader.close();
+                if (process != null) process.destroy();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return outputLines;
+    }
+
+
+    /**
+     * 保存文件到sd
+     *
+     * @param filename
+     * @param content
+     * @return
+     */
+    public static boolean saveContentToSdcard(String filename, String content) {
+        FileWriter writer = null;
+        boolean flag = false;
+//        FileOutputStream fos = null;
+        try {
+            File file = new File(Environment.getExternalStorageDirectory() + "/", filename);
+            writer = new FileWriter(file, true);
+            writer.write(content);
+            flag = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            flag = false;
+        } finally {
+            try {
+                if (writer != null) {
+                    writer.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        return flag;
     }
 
 }
